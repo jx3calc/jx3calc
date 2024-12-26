@@ -41,3 +41,6 @@ next-env.d.ts
 
 # Rust
 /target/
+
+# jx3pak
+src/pak/src/jx3pak/
