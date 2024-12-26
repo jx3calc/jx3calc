@@ -25,3 +25,4 @@ tauri = { version = "2.1.0", features = [] }
 tauri-plugin-log = "2.0.0-rc"
 add = { path = "../src/add" }
 hello = { path = "../src/hello" }
+bye = { path = "../src/bye" }
