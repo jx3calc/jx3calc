@@ -15,4 +15,4 @@ macro_rules! external_unsafe {
     };
 }
 
-external_unsafe!(say_goodbye, *mut std::os::raw::c_char, name: *const std::os::raw::c_char);
+external_unsafe!(say_hello, *mut std::os::raw::c_char, name: *const std::os::raw::c_char);
