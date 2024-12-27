@@ -1,5 +1,5 @@
 #[cfg(feature = "lib_local")]
-pub mod src;
+mod src;
 #[cfg(feature = "lib_local")]
 pub use src::*;
 
