@@ -15,4 +15,6 @@ macro_rules! external_unsafe {
     };
 }
 
-external_unsafe!(say_hello, *mut std::os::raw::c_char, name: *const std::os::raw::c_char);
+external_unsafe!(tab_init, c_int, path: *const c_char, index: *const *const c_char, index_len: usize, cols: *const *const c_char, cols_len: usize);
+external_unsafe!(tab_get, c_int, i: c_int, index: *const *const c_char, index_len: usize, result: *mut c_char, result_maxlen: usize);
+external_unsafe!(lua_get, c_int, path: *const c_char, result: *mut c_char, result_maxlen: usize);
