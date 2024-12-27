@@ -4,6 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+byteorder = "1.5.0"
+encoding_rs = "0.8.35"
+env_logger = "0.11.5"
+indicatif = "0.17.9"
+log = { version = "0.4.22", features = ["release_max_level_off"] }
+zstd = "0.13.2"
 
 [features]
 default = []
