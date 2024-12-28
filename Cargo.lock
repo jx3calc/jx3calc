@@ -2431,6 +2431,7 @@ dependencies = [
  "env_logger",
  "indicatif",
  "log",
+ "once_cell",
  "zstd",
 ]
 
