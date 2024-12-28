@@ -43,4 +43,4 @@ next-env.d.ts
 /target/
 
 # jx3pak
-src/pak/src/jx3pak/
+src-pak/src/jx3pak/

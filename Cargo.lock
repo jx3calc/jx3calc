@@ -3,10 +3,6 @@
 version = 3
 
 [[package]]
-name = "add"
-version = "0.1.0"
-
-[[package]]
 name = "addr2line"
 version = "0.24.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -147,7 +143,7 @@ checksum = "4c95c10ba0b00a02636238b814946408b1322d5ac4760326e6fb8ec956d85775"
 name = "app"
 version = "0.1.0"
 dependencies = [
- "add",
+ "calc",
  "log",
  "pak",
  "serde",
@@ -399,6 +395,10 @@ dependencies = [
  "libc",
  "system-deps",
 ]
+
+[[package]]
+name = "calc"
+version = "0.1.0"
 
 [[package]]
 name = "camino"
