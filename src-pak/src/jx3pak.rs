@@ -3,6 +3,9 @@ mod src;
 #[cfg(feature = "lib_local")]
 pub use src::*;
 
+#[cfg(not(feature = "lib_local"))]
+use std::os::raw::{c_char, c_int};
+
 macro_rules! external_unsafe {
     ($name:ident, $ret:ty, $( $arg:ident : $arg_ty:ty ),*) => {
         #[cfg(not(feature = "lib_local"))]
@@ -15,6 +18,7 @@ macro_rules! external_unsafe {
     };
 }
 
-external_unsafe!(tab_init, c_int, path: *const c_char, index: *const *const c_char, index_len: usize, cols: *const *const c_char, cols_len: usize);
-external_unsafe!(tab_get, c_int, i: c_int, index: *const *const c_char, index_len: usize, result: *mut c_char, result_maxlen: usize);
-external_unsafe!(lua_get, c_int, path: *const c_char, result: *mut c_char, result_maxlen: usize);
+external_unsafe!(init, c_int, path: *const c_char);
+external_unsafe!(tab_init, c_int, path: *const c_char, indexs: *const c_char, fields: *const c_char);
+external_unsafe!(tab_get, c_int, tabname: *const c_char, key: *const c_char, result: *mut c_char, result_maxlen: c_int);
+external_unsafe!(lua_get, c_int, path: *const c_char, result: *mut c_char, result_maxlen: c_int);
