@@ -17,10 +17,10 @@ jobs:
       - name: build and test
         if: matrix.os != 'ubuntu-24.04'
         run: |
-          cargo build --release --verbose
-          cargo test --release --verbose
+          cargo build --release --verbose --all
+          cargo test --release --verbose --all
       - name: build and test
         if: matrix.os == 'ubuntu-24.04'
         run: |
-          cargo build --release --verbose --exclude app
-          cargo test --release --verbose --exclude app
+          cargo build --release --verbose --all --exclude app
+          cargo test --release --verbose --all --exclude app
