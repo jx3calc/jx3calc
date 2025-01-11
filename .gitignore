@@ -44,3 +44,7 @@ next-env.d.ts
 
 # jx3pak
 src-pak/src/jx3pak/
+
+# cache
+*/cache/*
+/cache/
