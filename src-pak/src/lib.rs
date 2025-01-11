@@ -99,14 +99,10 @@ mod tests {
 
     #[test]
     fn test() {
-        let v4_path = match std::env::var("v4_path") {
-            Ok(v4_path) => v4_path,
-            Err(_) => {
-                assert!(true);
-                return;
-            }
+        match std::env::var("v4_path") {
+            Ok(v4_path) => assert!(init(&v4_path)), // v4
+            Err(_) => assert!(init("./cache")),     // v5
         };
-        assert!(init(&v4_path));
 
         assert!(tab_init(
             "settings/skill/buff.tab",
