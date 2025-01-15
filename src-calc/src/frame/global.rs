@@ -2,35 +2,33 @@ mod buff;
 
 use crate::config;
 
+use log;
+
 static ARRAY_SIZE: usize = 1024;
 
-pub trait SubTrait<V> {
+pub trait SubTrait<T> {
     fn struct_name() -> &'static str;
     fn tab_init();
-    fn tab_get(key: &V) -> Self;
+    fn tab_get(key: &T) -> Self;
 }
 
-struct ManagerItem<K, V>
+struct ManagerItem<'a, K, V>
 where
     K: Eq + std::hash::Hash,
-    V: 'static,
 {
-    map: std::collections::HashMap<K, &'static V>,
-    data: Vec<*mut V>,
+    map: std::collections::HashMap<K, &'a V>,
+    data: Vec<Box<[Option<V>; ARRAY_SIZE]>>, // Use Option to allow for uninitialized values
 }
 
-unsafe impl<K: Eq + std::hash::Hash, V> Send for ManagerItem<K, V> {}
-unsafe impl<K: Eq + std::hash::Hash, V> Sync for ManagerItem<K, V> {}
-
-pub struct Manager<K, V>
+pub struct Manager<'a, K, V>
 where
     K: Eq + std::hash::Hash + std::fmt::Debug + Clone,
-    V: 'static + SubTrait<K>,
+    V: SubTrait<K>,
 {
-    v: std::sync::RwLock<ManagerItem<K, V>>,
+    v: std::sync::RwLock<ManagerItem<'a, K, V>>,
 }
 
-impl<K, V> Manager<K, V>
+impl<'b, 'a: 'b, K, V> Manager<'a, K, V>
 where
     K: Eq + std::hash::Hash + std::fmt::Debug + Clone,
     V: SubTrait<K>,
@@ -51,19 +49,17 @@ where
         if v.map.contains_key(&key) {
             return;
         }
-        let i = v.map.len() % ARRAY_SIZE;
-        if i == 0 {
-            let array: Box<[V; ARRAY_SIZE]> = Box::new(unsafe { std::mem::zeroed() });
-            v.data.push(Box::leak(array).as_mut_ptr());
+        let remainder = v.map.len() % ARRAY_SIZE;
+        if remainder == 0 {
+            v.data.push(Box::new([const { None }; ARRAY_SIZE]));
         }
-        unsafe {
-            let ptr = v.data.last_mut().unwrap().add(i);
-            std::ptr::write(ptr, value);
-            v.map.insert(key, &*ptr);
-        }
+        // SAFETY: We just pushed a new element to the data vector
+        v.data.last_mut().unwrap()[remainder] = Some(value);
+        let ptr = v.data.last().unwrap()[remainder].as_ref().unwrap() as *const V;
+        v.map.insert(key, unsafe { &*ptr });
     }
 
-    fn get(&self, key: &K) -> &'static V {
+    fn get(&self, key: &K) -> &'b V {
         let v = self.v.read().unwrap();
         let res = v.map.get(key);
         if res.is_some() {
@@ -137,7 +133,7 @@ mod tests {
     }
 
     #[test]
-    fn test_manager_memory_leak() {
+    fn test_manager_container_length() {
         let manager = std::sync::Arc::new(Manager::<TestKey, TestValue>::new());
 
         assert_eq!(manager.v.read().unwrap().map.len(), 0);
