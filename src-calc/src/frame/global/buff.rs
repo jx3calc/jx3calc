@@ -1,23 +1,45 @@
 use super::super::enumeration;
+use log::error;
 use once_cell::sync::Lazy;
 use pak;
-use strum::IntoEnumIterator;
-use strum_macros::{Display, EnumIter};
 
 static BUFF: Lazy<super::Manager<BuffKey, Buff>> = Lazy::new(super::Manager::new);
 
-/// Buff
-struct Buff {
-    id: i32,
-    level: i32,
-    name: String,
-    interval: i32,
-}
+enum_field!(
+    ID,
+    Level,
+    IsStackable,
+    MaxStackNum,
+    Count,
+    Interval,
+    Hide,
+    Exclude,
+    ScriptFile,
+    CanCancel,
+    MinInterval,
+    MaxInterval
+);
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct BuffKey {
     id: i32,
     level: i32,
+}
+
+/// Buff
+struct Buff {
+    id: i32,
+    level: i32,
+    is_stackable: bool,
+    max_stack_num: i32,
+    count: i32,
+    interval: i32,
+    hide: bool,
+    exclude: bool,
+    script_file: String,
+    can_cancel: bool,
+    min_interval: i32,
+    max_interval: i32,
 }
 
 impl super::SubTrait<BuffKey> for Buff {
@@ -31,37 +53,35 @@ impl super::SubTrait<BuffKey> for Buff {
             panic!("[global::buff] Tab init failed");
         }
     }
-    fn tab_get(key: &BuffKey) -> Self {
-        let res = pak::tab_get("buff.tab", &[&key.id.to_string(), &key.level.to_string()])
-            .expect(&format!("[global::buff] Tab get failed for key {:?}", key));
-        Buff {
-            id: res[Field::ID as usize].parse().unwrap(),
-            level: res[Field::Level as usize].parse().unwrap(),
-            name: res[Field::Name as usize].clone(),
-            interval: res[Field::Interval as usize].parse().unwrap(),
-        }
+    fn tab_get(key: &BuffKey) -> Option<Self> {
+        let res = match pak::tab_get("buff.tab", &[&key.id.to_string(), &key.level.to_string()]) {
+            Ok(res) => res,
+            Err(e) => {
+                error!("[global::buff] {:?} not found:\n{}", key, e);
+                return None;
+            }
+        };
+        Some(Buff {
+            id: res[Field::ID as usize].parse().ok()?,
+            level: res[Field::Level as usize].parse().ok()?,
+            is_stackable: res[Field::IsStackable as usize] == "1",
+            max_stack_num: res[Field::MaxStackNum as usize].parse().ok()?,
+            count: res[Field::Count as usize].parse().ok()?,
+            interval: res[Field::Interval as usize].parse().ok()?,
+            hide: res[Field::Hide as usize] == "1",
+            exclude: res[Field::Exclude as usize] == "1",
+            script_file: res[Field::ScriptFile as usize].clone(),
+            can_cancel: res[Field::CanCancel as usize] == "1",
+            min_interval: res[Field::MinInterval as usize].parse().ok()?,
+            max_interval: res[Field::MaxInterval as usize].parse().ok()?,
+        })
     }
 }
 
 impl Buff {
-    fn get(id: i32, level: i32) -> &'static Buff {
+    fn get(id: i32, level: i32) -> Option<&'static Buff> {
         let key = BuffKey { id, level };
         BUFF.get(&key)
-    }
-}
-
-#[allow(non_camel_case_types)]
-#[derive(EnumIter, Display)]
-enum Field {
-    ID,
-    Level,
-    Name,
-    Interval,
-}
-
-impl Field {
-    fn to_fields() -> Vec<String> {
-        Field::iter().map(|x| x.to_string()).collect()
     }
 }
 
@@ -71,10 +91,9 @@ mod tests {
 
     #[test]
     fn test_buff() {
-        let value = Buff::get(101, 1);
+        let value = Buff::get(101, 1).unwrap();
         assert_eq!(value.id, 101);
         assert_eq!(value.level, 1);
-        assert_eq!(value.name, "策划默认项(非程序默认行)");
         assert_eq!(value.interval, 0);
     }
 }

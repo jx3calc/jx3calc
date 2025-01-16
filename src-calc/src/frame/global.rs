@@ -9,7 +9,9 @@ static ARRAY_SIZE: usize = 1024;
 pub trait SubTrait<T> {
     fn struct_name() -> &'static str;
     fn tab_init();
-    fn tab_get(key: &T) -> Self;
+    fn tab_get(key: &T) -> Option<Self>
+    where
+        Self: Sized;
 }
 
 struct ManagerItem<'a, K, V>
@@ -59,20 +61,17 @@ where
         v.map.insert(key, unsafe { &*ptr });
     }
 
-    fn get(&self, key: &K) -> &'b V {
+    fn get(&self, key: &K) -> Option<&'b V> {
         let v = self.v.read().unwrap();
-        let res = v.map.get(key);
-        if res.is_some() {
-            return res.unwrap();
+        match v.map.get(key) {
+            Some(res) => Some(*res),
+            None => {
+                drop(v); // Release the read lock before acquiring the write lock
+                let value = V::tab_get(key)?; // Return None if tab_get returns None
+                self.add((*key).clone(), value); // Value is guaranteed to be Some
+                Some(self.v.read().unwrap().map.get(key).unwrap()) // Key is guaranteed to be in the map
+            }
         }
-        drop(v);
-        let value = V::tab_get(key);
-        self.add((*key).clone(), value);
-        self.v.read().unwrap().map.get(key).expect(&format!(
-            "[global] Key `{:?}` not found in struct {}",
-            key,
-            V::struct_name()
-        ))
     }
 }
 
@@ -94,8 +93,8 @@ mod tests {
             // Initialization logic for TestValue
         }
 
-        fn tab_get(key: &TestKey) -> Self {
-            TestValue(key.0 * 2)
+        fn tab_get(key: &TestKey) -> Option<TestValue> {
+            Some(TestValue(key.0 * 2))
         }
     }
 
@@ -107,11 +106,11 @@ mod tests {
         let value1 = TestValue(10);
         manager.add(key1.clone(), value1);
 
-        let retrieved_value = manager.get(&key1);
+        let retrieved_value = manager.get(&key1).unwrap();
         assert_eq!(retrieved_value.0, 10);
 
         let key2 = TestKey(2);
-        let retrieved_value2 = manager.get(&key2);
+        let retrieved_value2 = manager.get(&key2).unwrap();
         assert_eq!(retrieved_value2.0, 4); // tab_get logic doubles the key value
     }
 
@@ -125,7 +124,7 @@ mod tests {
 
         let manager_clone = std::sync::Arc::clone(&manager);
         let handle = std::thread::spawn(move || {
-            let retrieved_value = manager_clone.get(&key1);
+            let retrieved_value = manager_clone.get(&key1).unwrap();
             assert_eq!(retrieved_value.0, 10);
         });
 
@@ -146,24 +145,24 @@ mod tests {
         assert_eq!(manager.v.read().unwrap().data.len(), 1);
 
         let key1 = TestKey(1);
-        let _ = manager.get(&key1);
+        let _ = manager.get(&key1).unwrap();
         assert_eq!(manager.v.read().unwrap().map.len(), 2);
         assert_eq!(manager.v.read().unwrap().data.len(), 1);
 
         for i in 2..ARRAY_SIZE {
             let key = TestKey(i as i32);
-            let _ = manager.get(&key);
+            let _ = manager.get(&key).unwrap();
             assert_eq!(manager.v.read().unwrap().map.len(), i + 1);
             assert_eq!(manager.v.read().unwrap().data.len(), 1);
         }
 
         let key = TestKey((ARRAY_SIZE - 1) as i32);
-        let _ = manager.get(&key); // duplicate key
+        let _ = manager.get(&key).unwrap(); // duplicate key
         assert_eq!(manager.v.read().unwrap().map.len(), ARRAY_SIZE);
         assert_eq!(manager.v.read().unwrap().data.len(), 1);
 
         let key = TestKey(ARRAY_SIZE as i32);
-        let _ = manager.get(&key);
+        let _ = manager.get(&key).unwrap();
         assert_eq!(manager.v.read().unwrap().map.len(), ARRAY_SIZE + 1);
         assert_eq!(manager.v.read().unwrap().data.len(), 2);
     }
