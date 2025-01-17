@@ -1,3 +1,2 @@
-#[macro_use]
-mod enumeration;
+mod r#enum;
 mod global;

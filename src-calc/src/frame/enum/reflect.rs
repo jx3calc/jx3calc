@@ -1,26 +1,8 @@
 use num_enum::FromPrimitive;
 use strum_macros::{Display, EnumString};
 
-#[macro_export]
-macro_rules! enum_field {
-    ($($variant:ident),*) => {
-        use strum::IntoEnumIterator;
-        use strum_macros::{Display, EnumIter};
-        #[allow(non_camel_case_types)]
-        #[derive(EnumIter, Display)]
-        enum Field {
-            $($variant),*
-        }
-        impl Field {
-            fn to_fields() -> Vec<String> {
-                Field::iter().map(|x| x.to_string()).collect()
-            }
-        }
-    };
-}
-
 #[allow(non_camel_case_types)]
-#[derive(FromPrimitive, EnumString, Display)]
+#[derive(FromPrimitive, EnumString, Display, Debug, PartialEq, Eq)]
 #[repr(u8)]
 pub enum Attrib {
     atActiveThreatCoefficient,

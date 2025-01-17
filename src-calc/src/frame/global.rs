@@ -2,14 +2,12 @@ mod buff;
 
 use crate::config;
 
-use log;
-
 static ARRAY_SIZE: usize = 1024;
 
 pub trait SubTrait<T> {
     fn struct_name() -> &'static str;
     fn tab_init();
-    fn tab_get(key: &T) -> Option<Self>
+    fn construct_from_tab(key: &T) -> Option<Self>
     where
         Self: Sized;
 }
@@ -67,7 +65,7 @@ where
             Some(res) => Some(*res),
             None => {
                 drop(v); // Release the read lock before acquiring the write lock
-                let value = V::tab_get(key)?; // Return None if tab_get returns None
+                let value = V::construct_from_tab(key)?; // Return None if tab_get returns None
                 self.add((*key).clone(), value); // Value is guaranteed to be Some
                 Some(self.v.read().unwrap().map.get(key).unwrap()) // Key is guaranteed to be in the map
             }
@@ -93,7 +91,7 @@ mod tests {
             // Initialization logic for TestValue
         }
 
-        fn tab_get(key: &TestKey) -> Option<TestValue> {
+        fn construct_from_tab(key: &TestKey) -> Option<TestValue> {
             Some(TestValue(key.0 * 2))
         }
     }

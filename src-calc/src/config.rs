@@ -1,5 +1,5 @@
 use once_cell::sync::Lazy;
-use pak;
+use pak::init;
 
 pub static CONFIG: Lazy<Config> = Lazy::new(Config::new);
 
@@ -12,7 +12,7 @@ impl Config {
         let _ = CONFIG.value;
     }
     fn new() -> Self {
-        pak::init("./cache");
+        init("./cache");
         Config { value: 42 }
     }
 }
