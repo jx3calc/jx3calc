@@ -1,6 +1,6 @@
 use crate::frame::r#enum::{
-    field::{Buff as Field, BuffUI as UIField},
-    reflect::Attrib as RefAttrib,
+    fromstr::Attrib as RefAttrib,
+    tostr::{Buff as Field, BuffUI as UIField},
 };
 use pak::{tab_get, tab_init};
 
@@ -24,7 +24,7 @@ struct Buff {
     id: i32,
     level: i32,
     is_stackable: bool,
-    max_stack_num: i32,
+    max_stacknum: i32,
     count: i32,
     interval: i32,
     hide: bool,
@@ -55,15 +55,15 @@ enum AttribValue {
 
 #[derive(Debug, PartialEq, Eq)]
 struct Attrib {
-    tp: RefAttrib,
+    r#type: RefAttrib,
     value_a: AttribValue,
     value_b: AttribValue,
 }
 
-/* implementations */
+/* impls */
 
 impl Buff {
-    fn get(id: i32, level: i32) -> Option<&'static Buff> {
+    pub fn get(id: i32, level: i32) -> Option<&'static Buff> {
         let key = BuffKey { id, level };
         BUFF.get(&key)
     }
@@ -97,10 +97,12 @@ impl super::SubTrait<BuffKey> for Buff {
 
 fn parse_res(res: &[String]) -> Option<Buff> {
     let mut buff = Buff {
+        // `.ok()` should be used when the field is never an empty string.
+        // `.unwrap_or()` should be used if compatibility with empty strings is required.
         id: res[Field::ID as usize].parse().ok()?,
         level: res[Field::Level as usize].parse().ok()?,
         is_stackable: res[Field::IsStackable as usize] == "1",
-        max_stack_num: res[Field::MaxStackNum as usize].parse().ok()?,
+        max_stacknum: res[Field::MaxStackNum as usize].parse().ok()?,
         count: res[Field::Count as usize].parse().ok()?,
         interval: res[Field::Interval as usize].parse().ok()?,
         hide: res[Field::Hide as usize] == "1",
@@ -137,7 +139,7 @@ fn parse_res(res: &[String]) -> Option<Buff> {
                 Err(_) => AttribValue::String(res[begin + i * 3 + 2].clone()),
             };
             v.push(Attrib {
-                tp: attrib,
+                r#type: attrib,
                 value_a: va,
                 value_b: vb,
             });
@@ -203,7 +205,7 @@ mod tests {
         assert_eq!(value.id, 4052);
         assert_eq!(value.level, 1);
         assert_eq!(value.is_stackable, false);
-        assert_eq!(value.max_stack_num, 1);
+        assert_eq!(value.max_stacknum, 1);
         assert_eq!(value.count, 1);
         assert_eq!(value.interval, 160);
         assert_eq!(value.hide, false);
@@ -219,7 +221,7 @@ mod tests {
         assert_eq!(
             value.begin_attrib[0],
             Attrib {
-                tp: RefAttrib::atStealth,
+                r#type: RefAttrib::atStealth,
                 value_a: AttribValue::String(empty_string.clone()),
                 value_b: AttribValue::String(empty_string.clone()),
             }
@@ -227,7 +229,7 @@ mod tests {
         assert_eq!(
             value.begin_attrib[1],
             Attrib {
-                tp: RefAttrib::atMoveSpeedPercent,
+                r#type: RefAttrib::atMoveSpeedPercent,
                 value_a: AttribValue::Int(0),
                 value_b: AttribValue::String(empty_string.clone()),
             }
@@ -235,7 +237,7 @@ mod tests {
         assert_eq!(
             value.begin_attrib[2],
             Attrib {
-                tp: RefAttrib::atSkillEventHandler,
+                r#type: RefAttrib::atSkillEventHandler,
                 value_a: AttribValue::Int(696),
                 value_b: AttribValue::String(empty_string.clone()),
             }
@@ -243,7 +245,7 @@ mod tests {
         assert_eq!(
             value.begin_attrib[3],
             Attrib {
-                tp: RefAttrib::atSkillEventHandler,
+                r#type: RefAttrib::atSkillEventHandler,
                 value_a: AttribValue::Int(697),
                 value_b: AttribValue::String(empty_string.clone()),
             }
@@ -251,7 +253,7 @@ mod tests {
         assert_eq!(
             value.begin_attrib[4],
             Attrib {
-                tp: RefAttrib::atExecuteScript,
+                r#type: RefAttrib::atExecuteScript,
                 value_a: AttribValue::String("skill/明教/驱散隐身待机动作.lua".to_string()),
                 value_b: AttribValue::String(empty_string.clone()),
             }
@@ -259,7 +261,7 @@ mod tests {
         assert_eq!(
             value.begin_attrib[5],
             Attrib {
-                tp: RefAttrib::atExecuteScript,
+                r#type: RefAttrib::atExecuteScript,
                 value_a: AttribValue::String("skill/明教/明教_暗尘弥散_5秒惩罚CD.lua".to_string()),
                 value_b: AttribValue::String(empty_string.clone()),
             }
@@ -267,7 +269,7 @@ mod tests {
         assert_eq!(
             value.begin_attrib[6],
             Attrib {
-                tp: RefAttrib::atAddTransparencyValue,
+                r#type: RefAttrib::atAddTransparencyValue,
                 value_a: AttribValue::Int(-70),
                 value_b: AttribValue::String(empty_string.clone()),
             }
@@ -275,7 +277,7 @@ mod tests {
         assert_eq!(
             value.begin_attrib[7],
             Attrib {
-                tp: RefAttrib::atKnockedDownRate,
+                r#type: RefAttrib::atKnockedDownRate,
                 value_a: AttribValue::Int(-1024),
                 value_b: AttribValue::String(empty_string.clone()),
             }
@@ -283,7 +285,7 @@ mod tests {
         assert_eq!(
             value.begin_attrib[8],
             Attrib {
-                tp: RefAttrib::atExecuteScript,
+                r#type: RefAttrib::atExecuteScript,
                 value_a: AttribValue::String("skill/明教/新无间影狱加Buff.lua".to_string()),
                 value_b: AttribValue::String(empty_string.clone()),
             }
@@ -291,7 +293,7 @@ mod tests {
         assert_eq!(
             value.active_attrib[0],
             Attrib {
-                tp: RefAttrib::atBeImmunisedStealthEnable,
+                r#type: RefAttrib::atBeImmunisedStealthEnable,
                 value_a: AttribValue::String(empty_string.clone()),
                 value_b: AttribValue::String(empty_string.clone()),
             }
