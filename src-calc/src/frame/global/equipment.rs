@@ -36,15 +36,14 @@ impl super::SubTrait<i32> for Equipment {
             error!("[global::equipment] Tab init failed: Trinket");
         }
     }
-    fn construct_from_tab(key: &i32) -> Option<Self> {
-        let res = match tab_get("custom_trinket.tab", &[&key.to_string()]) {
-            Ok(res) => res,
+    fn construct_from_tab(key: &i32) -> Option<Vec<String>> {
+        match tab_get("custom_trinket.tab", &[&key.to_string()]) {
+            Ok(res) => Some(res),
             Err(e) => {
                 error!("[global::equipment] {:?} not found:\n{}", key, e);
-                return None;
+                None
             }
-        };
-        Self::parse_from_data(&res)
+        }
     }
     fn parse_from_data(data: &[String]) -> Option<Equipment> {
         Some(Equipment {

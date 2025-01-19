@@ -72,17 +72,20 @@ impl super::SubTrait<(i32, i32)> for Buff {
         }
         UI::tab_init();
     }
-    fn construct_from_tab(key: &(i32, i32)) -> Option<Self> {
-        let res = match tab_get("buff.tab", &[&key.0.to_string(), &key.1.to_string()]) {
-            Ok(res) => res,
+    fn construct_from_tab(key: &(i32, i32)) -> Option<Vec<String>> {
+        match tab_get("buff.tab", &[&key.0.to_string(), &key.1.to_string()]) {
+            Ok(mut res) => match UI::construct_from_tab(key) {
+                Some(mut ui) => {
+                    res.append(&mut ui);
+                    Some(res)
+                }
+                None => Some(res),
+            },
             Err(e) => {
                 error!("[global::buff] {:?} not found:\n{}", key, e);
-                return None;
+                None
             }
-        };
-        let mut buff = Self::parse_from_data(&res)?;
-        buff.ui = UI::construct_from_tab(key);
-        Some(buff)
+        }
     }
     fn parse_from_data(data: &[String]) -> Option<Buff> {
         let mut buff = Buff {
@@ -140,6 +143,11 @@ impl super::SubTrait<(i32, i32)> for Buff {
         add_attrib(&mut buff.active_attrib, &data, count, Field::ACTIVE);
         let count = count + Field::ACTIVE * 3;
         add_attrib(&mut buff.end_time_attrib, &data, count, Field::END_TIME);
+        let count = count + Field::END_TIME * 3;
+
+        if count < data.len() {
+            buff.ui = UI::parse_from_data(&data[count..]);
+        }
 
         Some(buff)
     }
@@ -156,9 +164,14 @@ impl super::SubTrait<(i32, i32)> for UI {
             error!("[global::buffui] Tab init failed");
         }
     }
-    fn construct_from_tab(key: &(i32, i32)) -> Option<Self> {
-        let res = tab_get("buff.txt", &[&key.0.to_string(), &key.1.to_string()]).ok()?;
-        Self::parse_from_data(&res)
+    fn construct_from_tab(key: &(i32, i32)) -> Option<Vec<String>> {
+        match tab_get("buff.txt", &[&key.0.to_string(), &key.1.to_string()]) {
+            Ok(res) => Some(res),
+            Err(e) => {
+                error!("[global::buffui] {:?} not found:\n{}", key, e);
+                None
+            }
+        }
     }
     fn parse_from_data(data: &[String]) -> Option<UI> {
         Some(UI {

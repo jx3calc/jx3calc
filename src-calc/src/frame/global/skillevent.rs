@@ -44,15 +44,14 @@ impl super::SubTrait<i32> for SkillEvent {
             error!("[global::skillevent] Tab init failed");
         }
     }
-    fn construct_from_tab(key: &i32) -> Option<Self> {
-        let res = match tab_get("skillevent.tab", &[&key.to_string()]) {
-            Ok(res) => res,
+    fn construct_from_tab(key: &i32) -> Option<Vec<String>> {
+        match tab_get("skillevent.tab", &[&key.to_string()]) {
+            Ok(res) => Some(res),
             Err(e) => {
                 error!("[global::skillevent] {:?} not found:\n{}", key, e);
-                return None;
+                None
             }
-        };
-        Self::parse_from_data(&res)
+        }
     }
     fn parse_from_data(data: &[String]) -> Option<SkillEvent> {
         Some(SkillEvent {

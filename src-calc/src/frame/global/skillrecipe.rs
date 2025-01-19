@@ -45,15 +45,14 @@ impl super::SubTrait<(i32, i32)> for SkillRecipe {
             error!("[global::skillrecipe] Tab init failed");
         }
     }
-    fn construct_from_tab(key: &(i32, i32)) -> Option<Self> {
-        let res = match tab_get("recipeskill.tab", &[&key.0.to_string(), &key.1.to_string()]) {
-            Ok(res) => res,
+    fn construct_from_tab(key: &(i32, i32)) -> Option<Vec<String>> {
+        match tab_get("recipeskill.tab", &[&key.0.to_string(), &key.1.to_string()]) {
+            Ok(res) => Some(res),
             Err(e) => {
                 error!("[global::skillrecipe] {:?} not found:\n{}", key, e);
-                return None;
+                None
             }
-        };
-        Self::parse_from_data(&res)
+        }
     }
     fn parse_from_data(data: &[String]) -> Option<SkillRecipe> {
         Some(SkillRecipe {

@@ -35,15 +35,14 @@ impl super::SubTrait<i32> for Cooldown {
             error!("[global::cooldown] Tab init failed");
         }
     }
-    fn construct_from_tab(key: &i32) -> Option<Self> {
-        let res = match tab_get("cooldownlist.tab", &[&key.to_string()]) {
-            Ok(res) => res,
+    fn construct_from_tab(key: &i32) -> Option<Vec<String>> {
+        match tab_get("cooldownlist.tab", &[&key.to_string()]) {
+            Ok(res) => Some(res),
             Err(e) => {
                 error!("[global::cooldown] {:?} not found:\n{}", key, e);
-                return None;
+                None
             }
-        };
-        Self::parse_from_data(&res)
+        }
     }
     fn parse_from_data(data: &[String]) -> Option<Cooldown> {
         // `.ok()` should be used when the field is never an empty string.

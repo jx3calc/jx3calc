@@ -12,9 +12,7 @@ static ARRAY_SIZE: usize = 1024;
 pub trait SubTrait<T> {
     fn struct_name() -> &'static str;
     fn tab_init();
-    fn construct_from_tab(key: &T) -> Option<Self>
-    where
-        Self: Sized;
+    fn construct_from_tab(key: &T) -> Option<Vec<String>>;
     fn parse_from_data(data: &[String]) -> Option<Self>
     where
         Self: Sized;
@@ -73,7 +71,8 @@ where
             Some(res) => Some(*res),
             None => {
                 drop(v); // Release the read lock before acquiring the write lock
-                let value = V::construct_from_tab(key)?; // Return None if tab_get returns None
+                let data = V::construct_from_tab(key)?; // Return None if tab_get returns None
+                let value = V::parse_from_data(&data)?; // Return None if parse_from_data returns None
                 self.add((*key).clone(), value); // Value is guaranteed to be Some
                 Some(self.v.read().unwrap().map.get(key).unwrap()) // Key is guaranteed to be in the map
             }
@@ -99,13 +98,12 @@ mod tests {
             // Initialization logic for TestValue
         }
 
-        fn construct_from_tab(key: &TestKey) -> Option<TestValue> {
-            Some(TestValue(key.0 * 2))
+        fn construct_from_tab(key: &TestKey) -> Option<Vec<String>> {
+            Some(vec![(key.0 * 2).to_string()])
         }
 
         fn parse_from_data(data: &[String]) -> Option<TestValue> {
-            let _ = data;
-            panic!("Not implemented");
+            Some(TestValue(data[0].parse().unwrap()))
         }
     }
 
