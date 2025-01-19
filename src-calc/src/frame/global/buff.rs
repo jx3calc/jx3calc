@@ -1,7 +1,4 @@
-use crate::frame::r#enum::{
-    fromstr::Attrib as RefAttrib,
-    tostr::{Buff as Field, BuffUI as UIField},
-};
+use crate::frame::r#enum::{fromstr::Attrib as RefAttrib, tostr::Buff as Field};
 use pak::{tab_get, tab_init};
 
 use log::error;
@@ -30,16 +27,12 @@ pub struct Buff {
     begin_attrib: Vec<Attrib>,
     active_attrib: Vec<Attrib>,
     end_time_attrib: Vec<Attrib>,
-    ui: Option<UI>,
+    name: Option<String>,
 }
 
 /* sub structs */
 
-struct UI {
-    id: i32,
-    level: i32,
-    name: String,
-}
+struct UI(String);
 
 #[derive(Debug, PartialEq, Eq)]
 enum AttribValue {
@@ -106,8 +99,9 @@ impl super::SubTrait<(i32, i32)> for Buff {
             begin_attrib: Vec::new(),
             active_attrib: Vec::new(),
             end_time_attrib: Vec::new(),
-            ui: None,
+            name: None,
         };
+        // 处理 Attrib
         fn add_attrib(v: &mut Vec<Attrib>, res: &[String], begin: usize, count: usize) {
             use std::str::FromStr; // Required for Attrib::from_str
             for i in 0..count {
@@ -145,8 +139,9 @@ impl super::SubTrait<(i32, i32)> for Buff {
         add_attrib(&mut buff.end_time_attrib, &data, count, Field::END_TIME);
         let count = count + Field::END_TIME * 3;
 
+        //  处理 UI
         if count < data.len() {
-            buff.ui = UI::parse_from_data(&data[count..]);
+            buff.name = UI::parse_from_data(&data[count..]).map(|ui| ui.0);
         }
 
         Some(buff)
@@ -158,8 +153,7 @@ impl super::SubTrait<(i32, i32)> for UI {
         "BuffUI"
     }
     fn tab_init() {
-        let fields: Vec<String> = UIField::to_fields();
-        let fields: Vec<&str> = fields.iter().map(|s| s.as_str()).collect();
+        let fields = vec!["Name"];
         if !tab_init("ui/scheme/case/buff.txt", &["BuffID", "Level"], &fields) {
             error!("[global::buffui] Tab init failed");
         }
@@ -174,11 +168,7 @@ impl super::SubTrait<(i32, i32)> for UI {
         }
     }
     fn parse_from_data(data: &[String]) -> Option<UI> {
-        Some(UI {
-            id: data[UIField::BuffID as usize].parse().ok()?,
-            level: data[UIField::Level as usize].parse().ok()?,
-            name: data[UIField::Name as usize].clone(),
-        })
+        Some(UI(data[0].clone()))
     }
 }
 
@@ -194,7 +184,7 @@ mod tests {
         assert_eq!(value.id, 101);
         assert_eq!(value.level, 1);
         assert_eq!(
-            value.ui.as_ref().unwrap().name,
+            value.name.as_ref().unwrap(),
             "Buff=1，Debuff=2，Dot=3，Hot=4"
         );
     }

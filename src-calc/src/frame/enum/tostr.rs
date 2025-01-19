@@ -59,12 +59,6 @@ macro_rules! common_enum {
     };
 }
 
-common_enum! { BuffUI {
-    BuffID,
-    Level,
-    Name,
-}}
-
 common_enum! { Cooldown {
     ID,
     Duration,

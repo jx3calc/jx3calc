@@ -1,18 +1,26 @@
 use crate::frame::r#enum::{
     fromstr::skill::{CastMode, KindType},
-    // tostr::Skill as Field,
+    tostr::Skill as Field,
 };
-// use pak::{tab_get, tab_init};
+use pak::{tab_get, tab_init};
 
-// use log::error;
-// use once_cell::sync::Lazy;
+use log::error;
+use once_cell::sync::Lazy;
+use strum::IntoEnumIterator;
 
-/* structs */
+/* static manager variable */
+static SKILL: Lazy<super::Manager<(i32, i32), Skill>> = Lazy::new(super::Manager::new);
+static SKILL_DATA: Lazy<super::Manager<i32, SkillData>> = Lazy::new(super::Manager::new);
+
+/* struct */
+
+type SkillData = Vec<String>;
 
 /// Skill
-struct Skill {
+pub struct Skill {
     id: i32,
     level: i32,
+    name: Option<String>,
 
     max_level: i32,
     kind_type: KindType,
@@ -114,6 +122,8 @@ struct Skill {
 
 /* sub structs */
 
+struct UI(String);
+
 #[derive(Debug, PartialEq, Eq)]
 enum AttributeValue {
     Int(i32),
@@ -167,4 +177,232 @@ struct DelaySubSkill {
     delay: i32,
     id: i32,
     level: i32,
+}
+
+/* impls */
+
+pub fn get(id: i32, level: i32) -> Option<&'static Skill> {
+    SKILL.get(&(id, level))
+}
+
+impl super::SubTrait<i32> for SkillData {
+    fn struct_name() -> &'static str {
+        "SkillData"
+    }
+    fn tab_init() {
+        let fields = Field::to_fields();
+        let fields: Vec<&str> = fields.iter().map(|s| s.as_str()).collect();
+        if !tab_init("settings/skill/skills.tab", &["SkillID"], &fields) {
+            error!("[global::skill] Tab init failed");
+        }
+    }
+    fn construct_from_tab(key: &i32) -> Option<Vec<String>> {
+        match tab_get("skills.tab", &[&key.to_string()]) {
+            Ok(res) => Some(res),
+            Err(e) => {
+                error!("[global::skilldata] {:?} not found:\n{}", key, e);
+                None
+            }
+        }
+    }
+    fn parse_from_data(data: &[String]) -> Option<SkillData> {
+        Some(data.to_vec())
+    }
+}
+
+impl super::SubTrait<(i32, i32)> for Skill {
+    fn struct_name() -> &'static str {
+        "Skill"
+    }
+    fn tab_init() {
+        SkillData::tab_init();
+        UI::tab_init();
+    }
+    fn construct_from_tab(key: &(i32, i32)) -> Option<Vec<String>> {
+        match SKILL_DATA.get(&(key.0)) {
+            Some(res) => {
+                let mut res = res.clone();
+                res.push(key.1.to_string());
+                match UI::construct_from_tab(key) {
+                    Some(mut ui) => {
+                        res.append(&mut ui);
+                        Some(res)
+                    }
+                    None => Some(res),
+                }
+            }
+            None => {
+                error!("[global::skill] {:?} data get error.", key);
+                None
+            }
+        }
+    }
+    fn parse_from_data(data: &[String]) -> Option<Skill> {
+        // `.ok()` should be used when the field is never an empty string.
+        // `.unwrap_or()` should be used if compatibility with empty strings is required.
+        let mut skill = Skill {
+            id: data[Field::SkillID as usize].parse().ok()?,
+            max_level: data[Field::MaxLevel as usize].parse().unwrap_or(1),
+            kind_type: data[Field::KindType as usize].parse().ok()?,
+            cast_mode: data[Field::CastMode as usize].parse().ok()?,
+            mount_request_type: data[Field::MountRequestType as usize].parse().unwrap_or(0),
+            mount_request_detail: data[Field::MountRequestDetail as usize]
+                .parse()
+                .unwrap_or(0),
+            is_passive_skill: data[Field::IsPassiveSkill as usize] == "1",
+            has_critical_strike: data[Field::HasCriticalStrike as usize] == "1",
+            skill_event_mask1: data[Field::SkillEventMask1 as usize].parse().unwrap_or(0),
+            skill_event_mask2: data[Field::SkillEventMask2 as usize].parse().unwrap_or(0),
+            need_out_of_fight: data[Field::NeedOutOfFight as usize] == "1",
+            target_type_player: data[Field::TargetTypePlayer as usize] == "1",
+            target_type_npc: data[Field::TargetTypeNpc as usize] == "1",
+            target_relation_none: data[Field::TargetRelationNone as usize] == "1",
+            target_relation_self: data[Field::TargetRelationSelf as usize] == "1",
+            target_relation_enemy: data[Field::TargetRelationEnemy as usize] == "1",
+            recipe_type: data[Field::RecipeType as usize].parse().unwrap_or(0),
+            is_frost: data[Field::IsFrost as usize] == "1",
+
+            level: 0,
+            name: None,
+            attributes: Vec::new(),
+            check_buffs: Vec::new(),
+            check_self_learnt_skills: Vec::new(),
+            bind_buff: [const { None }; 4],
+            cooldown: Cooldown {
+                public: None,
+                normal: [None; 3],
+                normal_add: [0; 3],
+                check: [None; 3],
+            },
+            delay_sub_skills: Vec::new(),
+
+            dw_level_up_exp: 0,
+            n_exp_add_odds: 0,
+            n_player_level_limit: 0,
+            n_base_threat: 0,
+            n_cost_life: 0,
+            n_cost_mana: 0,
+            n_cost_stamina: 0,
+            n_cost_item_type: 0,
+            n_cost_item_index: 0,
+            n_cost_mana_base_percent: 0,
+            n_cost_sprint_power: 0,
+            b_is_accumulate: false,
+            n_chain_branch: 0,
+            n_chain_depth: 0,
+            n_min_radius: 0,
+            n_max_radius: 0,
+            n_protect_radius: 0,
+            n_height: 0,
+            n_rect_width: 0,
+            n_angle_range: 0,
+            b_full_angle_in_air: false,
+            n_area_radius: 0,
+            n_target_count_limit: 0,
+            b_ignore_prepare_state: false,
+            n_prepare_frames: 0,
+            n_channel_interval: 0,
+            n_channel_frame: 0,
+            n_bullet_velocity: 0,
+            b_is_sun_moon_power: false,
+            sun_subsection_skill_id: 0,
+            sun_subsection_skill_level: 0,
+            moon_subsection_skill_id: 0,
+            moon_subsection_skill_level: 0,
+            b_is_formation_skill: false,
+            n_formation_range: 0,
+            n_least_formation_population: 0,
+            n_target_life_percent_min: 0,
+            n_target_life_percent_max: 0,
+            n_self_life_percent_min: 0,
+            n_self_life_percent_max: 0,
+            n_beat_back_rate: 0,
+            n_broken_rate: 0,
+            n_break_rate: 0,
+            n_dismounting_rate: 0,
+            n_weapon_damage_percent: 0,
+        };
+
+        // 处理默认武器伤害.
+        // 目前推测: WeaponRequest 字段非 0 的技能默认拥有 1024 的武器伤害 (可以在后续 lua 的 getGetSkillLevelData 中被覆盖).
+        // 注意: 拥有武器伤害不一定代表会造成武器伤害. 造成武器伤害与 AddAttribute 中的 CALL_PHYSICS_DAMAGE 有关.
+        // 推测的依据:
+        // 1. 部分技能并没有在 lua 中显式声明 nWeaponDamagePercent, 但是仍然可以造成武器伤害. (最简单的例子即为普通攻击)
+        // 2. 部分不造成武器伤害的外功技能, 似乎都在 lua 中显式声明了其 nWeaponDamagePercent = 0. (例如, 丐帮的诸多需要武器施展的技能.)
+        // 暂时按照该推测进行处理.
+        let weapon_request = &data[Field::WeaponRequest as usize];
+        if !weapon_request.is_empty() && weapon_request != "0" {
+            skill.n_weapon_damage_percent = 1024;
+        }
+
+        // 处理 level
+        let count = Field::iter().count();
+        let level: i32 = data[count].parse().ok()?; // Will not fail
+        skill.level = if level > 0 { level } else { skill.max_level };
+
+        // 处理 UI
+        if count + 1 < data.len() {
+            skill.name = UI::parse_from_data(&data[count + 1..]).map(|ui| ui.0);
+        }
+
+        Some(skill)
+    }
+}
+
+impl super::SubTrait<(i32, i32)> for UI {
+    fn struct_name() -> &'static str {
+        "SkillUI"
+    }
+    fn tab_init() {
+        let fields = vec!["Name"];
+        if !tab_init("ui/scheme/case/skill.txt", &["SkillID", "Level"], &fields) {
+            error!("[global::skillui] Tab init failed");
+        }
+    }
+    fn construct_from_tab(key: &(i32, i32)) -> Option<Vec<String>> {
+        match tab_get("skill.txt", &[&key.0.to_string(), &key.1.to_string()]) {
+            Ok(res) => Some(res),
+            Err(e) => {
+                error!("[global::skillui] {:?} not found:\n{}", key, e);
+                None
+            }
+        }
+    }
+    fn parse_from_data(data: &[String]) -> Option<UI> {
+        Some(UI(data[0].clone()))
+    }
+}
+
+/* tests */
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn from_pak() {
+        env_logger::builder()
+            .filter_level(log::LevelFilter::Trace)
+            .init();
+        let value = get(1, 1).unwrap();
+        assert_eq!(value.id, 1);
+        assert_eq!(value.level, 1);
+        assert_eq!(value.name.as_ref().unwrap(), "测试技能");
+        assert_eq!(value.max_level, 2);
+        assert_eq!(value.kind_type, KindType::None);
+        assert_eq!(value.cast_mode, CastMode::TargetSingle);
+        assert_eq!(value.mount_request_type, 0);
+        assert_eq!(value.mount_request_detail, 0);
+        assert_eq!(value.is_passive_skill, false);
+        assert_eq!(value.has_critical_strike, true);
+        assert_eq!(value.skill_event_mask1, 0);
+        assert_eq!(value.skill_event_mask2, 0);
+        assert_eq!(value.need_out_of_fight, false);
+        assert_eq!(value.target_type_player, true);
+        assert_eq!(value.target_type_npc, true);
+        assert_eq!(value.target_relation_none, true);
+        assert_eq!(value.target_relation_self, true);
+        assert_eq!(value.target_relation_enemy, true);
+        assert_eq!(value.recipe_type, 0);
+        assert_eq!(value.is_frost, false);
+    }
 }
