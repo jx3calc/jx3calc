@@ -10,7 +10,7 @@ static COOLDOWN: Lazy<super::Manager<i32, Cooldown>> = Lazy::new(super::Manager:
 /* struct */
 
 /// Cooldown
-struct Cooldown {
+pub struct Cooldown {
     id: i32,
     duration_frame: i32,
     min_duration_frame: i32,
@@ -20,10 +20,8 @@ struct Cooldown {
 
 /* impls */
 
-impl Cooldown {
-    pub fn get(id: i32) -> Option<&'static Cooldown> {
-        COOLDOWN.get(&id)
-    }
+pub fn get(id: i32) -> Option<&'static Cooldown> {
+    COOLDOWN.get(&id)
 }
 
 impl super::SubTrait<i32> for Cooldown {
@@ -71,7 +69,7 @@ mod tests {
 
     #[test]
     fn from_pak() {
-        let value = Cooldown::get(8).unwrap();
+        let value = get(8).unwrap();
         assert_eq!(value.id, 8);
         assert_eq!(value.duration_frame, 8);
         assert_eq!(value.min_duration_frame, 8);

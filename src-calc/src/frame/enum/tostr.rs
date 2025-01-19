@@ -73,7 +73,7 @@ common_enum! { Cooldown {
     MaxCount,
 }}
 
-common_enum! { ItemTrinket {
+common_enum! { CustomTrinket {
     ID,
     SkillID,
     SkillLevel,

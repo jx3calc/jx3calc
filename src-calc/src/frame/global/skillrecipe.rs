@@ -12,7 +12,7 @@ static SKILL_RECIPE: Lazy<super::Manager<(i32, i32), SkillRecipe>> = Lazy::new(s
 /* struct */
 
 /// SkillRecipe
-struct SkillRecipe {
+pub struct SkillRecipe {
     recipe_id: i32,
     recipe_level: i32,
     skill_recipe_type: i32,
@@ -26,10 +26,8 @@ struct SkillRecipe {
 
 /* impls */
 
-impl SkillRecipe {
-    pub fn get(id: i32, level: i32) -> Option<&'static SkillRecipe> {
-        SKILL_RECIPE.get(&(id, level))
-    }
+pub fn get(id: i32, level: i32) -> Option<&'static SkillRecipe> {
+    SKILL_RECIPE.get(&(id, level))
 }
 
 impl super::SubTrait<(i32, i32)> for SkillRecipe {
@@ -82,7 +80,7 @@ mod tests {
 
     #[test]
     fn from_pak() {
-        let value = SkillRecipe::get(1, 1).unwrap();
+        let value = get(1, 1).unwrap();
         assert_eq!(value.recipe_id, 1);
         assert_eq!(value.recipe_level, 1);
         assert_eq!(value.skill_recipe_type, 0);

@@ -14,7 +14,7 @@ static BUFF: Lazy<super::Manager<(i32, i32), Buff>> = Lazy::new(super::Manager::
 /* struct */
 
 /// Buff
-struct Buff {
+pub struct Buff {
     id: i32,
     level: i32,
     is_stackable: bool,
@@ -56,10 +56,8 @@ struct Attrib {
 
 /* impls */
 
-impl Buff {
-    pub fn get(id: i32, level: i32) -> Option<&'static Buff> {
-        BUFF.get(&(id, level))
-    }
+pub fn get(id: i32, level: i32) -> Option<&'static Buff> {
+    BUFF.get(&(id, level))
 }
 
 impl super::SubTrait<(i32, i32)> for Buff {
@@ -176,7 +174,7 @@ mod tests {
 
     #[test]
     fn from_pak() {
-        let value = Buff::get(101, 1).unwrap();
+        let value = get(101, 1).unwrap();
         assert_eq!(value.id, 101);
         assert_eq!(value.level, 1);
         assert_eq!(

@@ -1,6 +1,6 @@
 mod buff;
 mod cooldown;
-mod item;
+mod equipment;
 mod skill;
 mod skillevent;
 mod skillrecipe;

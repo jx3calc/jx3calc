@@ -13,7 +13,7 @@ static SKILL_EVENT: Lazy<super::Manager<i32, SkillEvent>> = Lazy::new(super::Man
 /* struct */
 
 /// SkillEvent
-struct SkillEvent {
+pub struct SkillEvent {
     id: i32,
     r#type: Type,
     odds: i32,
@@ -29,10 +29,8 @@ struct SkillEvent {
 
 /* impls */
 
-impl SkillEvent {
-    pub fn get(id: i32) -> Option<&'static SkillEvent> {
-        SKILL_EVENT.get(&id)
-    }
+pub fn get(id: i32) -> Option<&'static SkillEvent> {
+    SKILL_EVENT.get(&id)
 }
 
 impl super::SubTrait<i32> for SkillEvent {
@@ -83,7 +81,7 @@ mod tests {
 
     #[test]
     fn from_pak() {
-        let value = SkillEvent::get(0).unwrap();
+        let value = get(0).unwrap();
         assert_eq!(value.id, 0);
         assert_eq!(value.r#type, Type::Hit);
         assert_eq!(value.odds, 1024);
