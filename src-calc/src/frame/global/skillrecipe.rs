@@ -53,24 +53,23 @@ impl super::SubTrait<(i32, i32)> for SkillRecipe {
                 return None;
             }
         };
-        parse_res(&res)
+        Self::parse_from_data(&res)
     }
-}
-
-fn parse_res(res: &[String]) -> Option<SkillRecipe> {
-    Some(SkillRecipe {
-        // `.ok()` should be used when the field is never an empty string.
-        // `.unwrap_or()` should be used if compatibility with empty strings is required.
-        recipe_id: res[Field::RecipeID as usize].parse().ok()?,
-        recipe_level: res[Field::RecipeLevel as usize].parse().ok()?,
-        skill_recipe_type: res[Field::SkillRecipeType as usize].parse().unwrap_or(0),
-        skill_id: res[Field::SkillID as usize].parse().unwrap_or(0),
-        cool_down_add1: res[Field::CoolDownAdd1 as usize].parse().unwrap_or(0),
-        cool_down_add2: res[Field::CoolDownAdd2 as usize].parse().unwrap_or(0),
-        cool_down_add3: res[Field::CoolDownAdd3 as usize].parse().unwrap_or(0),
-        damage_add_percent: res[Field::DamageAddPercent as usize].parse().unwrap_or(0),
-        has_script_file: !res[Field::ScriptFile as usize].is_empty(),
-    })
+    fn parse_from_data(data: &[String]) -> Option<SkillRecipe> {
+        Some(SkillRecipe {
+            // `.ok()` should be used when the field is never an empty string.
+            // `.unwrap_or()` should be used if compatibility with empty strings is required.
+            recipe_id: data[Field::RecipeID as usize].parse().ok()?,
+            recipe_level: data[Field::RecipeLevel as usize].parse().ok()?,
+            skill_recipe_type: data[Field::SkillRecipeType as usize].parse().unwrap_or(0),
+            skill_id: data[Field::SkillID as usize].parse().unwrap_or(0),
+            cool_down_add1: data[Field::CoolDownAdd1 as usize].parse().unwrap_or(0),
+            cool_down_add2: data[Field::CoolDownAdd2 as usize].parse().unwrap_or(0),
+            cool_down_add3: data[Field::CoolDownAdd3 as usize].parse().unwrap_or(0),
+            damage_add_percent: data[Field::DamageAddPercent as usize].parse().unwrap_or(0),
+            has_script_file: !data[Field::ScriptFile as usize].is_empty(),
+        })
+    }
 }
 
 /* tests */

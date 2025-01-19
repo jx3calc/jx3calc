@@ -80,70 +80,69 @@ impl super::SubTrait<(i32, i32)> for Buff {
                 return None;
             }
         };
-        let mut buff = parse_res(&res)?;
+        let mut buff = Self::parse_from_data(&res)?;
         buff.ui = UI::construct_from_tab(key);
         Some(buff)
     }
-}
-
-fn parse_res(res: &[String]) -> Option<Buff> {
-    let mut buff = Buff {
-        // `.ok()` should be used when the field is never an empty string.
-        // `.unwrap_or()` should be used if compatibility with empty strings is required.
-        id: res[Field::ID as usize].parse().ok()?,
-        level: res[Field::Level as usize].parse().ok()?,
-        is_stackable: res[Field::IsStackable as usize] == "1",
-        max_stacknum: res[Field::MaxStackNum as usize].parse().ok()?,
-        count: res[Field::Count as usize].parse().ok()?,
-        interval: res[Field::Interval as usize].parse().ok()?,
-        hide: res[Field::Hide as usize] == "1",
-        exclude: res[Field::Exclude as usize] == "1",
-        script_file: res[Field::ScriptFile as usize].clone(),
-        can_cancel: res[Field::CanCancel as usize] == "1",
-        min_interval: res[Field::MinInterval as usize].parse().ok()?,
-        max_interval: res[Field::MaxInterval as usize].parse().ok()?,
-        begin_attrib: Vec::new(),
-        active_attrib: Vec::new(),
-        end_time_attrib: Vec::new(),
-        ui: None,
-    };
-    fn add_attrib(v: &mut Vec<Attrib>, res: &[String], begin: usize, count: usize) {
-        use std::str::FromStr; // Required for Attrib::from_str
-        for i in 0..count {
-            let attrib = &res[begin + i * 3];
-            if attrib.is_empty() {
-                continue;
-            }
-            let attrib = match RefAttrib::from_str(attrib) {
-                Ok(v) => v,
-                Err(_) => {
-                    error!("[global::buff] Unregistered attrib: {}", attrib);
+    fn parse_from_data(data: &[String]) -> Option<Buff> {
+        let mut buff = Buff {
+            // `.ok()` should be used when the field is never an empty string.
+            // `.unwrap_or()` should be used if compatibility with empty strings is required.
+            id: data[Field::ID as usize].parse().ok()?,
+            level: data[Field::Level as usize].parse().ok()?,
+            is_stackable: data[Field::IsStackable as usize] == "1",
+            max_stacknum: data[Field::MaxStackNum as usize].parse().ok()?,
+            count: data[Field::Count as usize].parse().ok()?,
+            interval: data[Field::Interval as usize].parse().ok()?,
+            hide: data[Field::Hide as usize] == "1",
+            exclude: data[Field::Exclude as usize] == "1",
+            script_file: data[Field::ScriptFile as usize].clone(),
+            can_cancel: data[Field::CanCancel as usize] == "1",
+            min_interval: data[Field::MinInterval as usize].parse().ok()?,
+            max_interval: data[Field::MaxInterval as usize].parse().ok()?,
+            begin_attrib: Vec::new(),
+            active_attrib: Vec::new(),
+            end_time_attrib: Vec::new(),
+            ui: None,
+        };
+        fn add_attrib(v: &mut Vec<Attrib>, res: &[String], begin: usize, count: usize) {
+            use std::str::FromStr; // Required for Attrib::from_str
+            for i in 0..count {
+                let attrib = &res[begin + i * 3];
+                if attrib.is_empty() {
                     continue;
                 }
-            };
-            let va = match res[begin + i * 3 + 1].parse::<i32>() {
-                Ok(v) => AttribValue::Int(v),
-                Err(_) => AttribValue::String(res[begin + i * 3 + 1].clone()),
-            };
-            let vb = match res[begin + i * 3 + 2].parse::<i32>() {
-                Ok(v) => AttribValue::Int(v),
-                Err(_) => AttribValue::String(res[begin + i * 3 + 2].clone()),
-            };
-            v.push(Attrib {
-                r#type: attrib,
-                value_a: va,
-                value_b: vb,
-            });
+                let attrib = match RefAttrib::from_str(attrib) {
+                    Ok(v) => v,
+                    Err(_) => {
+                        error!("[global::buff] Unregistered attrib: {}", attrib);
+                        continue;
+                    }
+                };
+                let va = match res[begin + i * 3 + 1].parse::<i32>() {
+                    Ok(v) => AttribValue::Int(v),
+                    Err(_) => AttribValue::String(res[begin + i * 3 + 1].clone()),
+                };
+                let vb = match res[begin + i * 3 + 2].parse::<i32>() {
+                    Ok(v) => AttribValue::Int(v),
+                    Err(_) => AttribValue::String(res[begin + i * 3 + 2].clone()),
+                };
+                v.push(Attrib {
+                    r#type: attrib,
+                    value_a: va,
+                    value_b: vb,
+                });
+            }
         }
-    }
-    let count = Field::iter().count();
-    add_attrib(&mut buff.begin_attrib, &res, count, Field::BEGIN);
-    let count = count + Field::BEGIN * 3;
-    add_attrib(&mut buff.active_attrib, &res, count, Field::ACTIVE);
-    let count = count + Field::ACTIVE * 3;
-    add_attrib(&mut buff.end_time_attrib, &res, count, Field::END_TIME);
+        let count = Field::iter().count();
+        add_attrib(&mut buff.begin_attrib, &data, count, Field::BEGIN);
+        let count = count + Field::BEGIN * 3;
+        add_attrib(&mut buff.active_attrib, &data, count, Field::ACTIVE);
+        let count = count + Field::ACTIVE * 3;
+        add_attrib(&mut buff.end_time_attrib, &data, count, Field::END_TIME);
 
-    Some(buff)
+        Some(buff)
+    }
 }
 
 impl super::SubTrait<(i32, i32)> for UI {
@@ -159,10 +158,13 @@ impl super::SubTrait<(i32, i32)> for UI {
     }
     fn construct_from_tab(key: &(i32, i32)) -> Option<Self> {
         let res = tab_get("buff.txt", &[&key.0.to_string(), &key.1.to_string()]).ok()?;
+        Self::parse_from_data(&res)
+    }
+    fn parse_from_data(data: &[String]) -> Option<UI> {
         Some(UI {
-            id: res[UIField::BuffID as usize].parse().ok()?,
-            level: res[UIField::Level as usize].parse().ok()?,
-            name: res[UIField::Name as usize].clone(),
+            id: data[UIField::BuffID as usize].parse().ok()?,
+            level: data[UIField::Level as usize].parse().ok()?,
+            name: data[UIField::Name as usize].clone(),
         })
     }
 }
@@ -170,6 +172,7 @@ impl super::SubTrait<(i32, i32)> for UI {
 /* tests */
 #[cfg(test)]
 mod tests {
+    use super::super::SubTrait;
     use super::*;
 
     #[test]
@@ -192,7 +195,7 @@ mod tests {
             .collect::<Vec<String>>();
         let res_len = Field::iter().count() + (Field::BEGIN + Field::ACTIVE + Field::END_TIME) * 3;
         assert_eq!(res.len(), res_len);
-        let value = parse_res(&res).unwrap();
+        let value = Buff::parse_from_data(&res).unwrap();
         assert_eq!(value.id, 4052);
         assert_eq!(value.level, 1);
         assert_eq!(value.is_stackable, false);

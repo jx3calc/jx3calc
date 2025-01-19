@@ -43,23 +43,22 @@ impl super::SubTrait<i32> for Cooldown {
                 return None;
             }
         };
-        parse_res(&res)
+        Self::parse_from_data(&res)
     }
-}
-
-fn parse_res(res: &[String]) -> Option<Cooldown> {
-    // `.ok()` should be used when the field is never an empty string.
-    // `.unwrap_or()` should be used if compatibility with empty strings is required.
-    let duration: f64 = res[Field::Duration as usize].parse().ok()?;
-    let min_duration: f64 = res[Field::MinDuration as usize].parse().ok()?;
-    let max_duration: f64 = res[Field::MaxDuration as usize].parse().ok()?;
-    Some(Cooldown {
-        id: res[Field::ID as usize].parse().ok()?,
-        duration_frame: (duration * 16.0).round() as i32,
-        min_duration_frame: (min_duration * 16.0).round() as i32,
-        max_duration_frame: (max_duration * 16.0).round() as i32,
-        max_count: res[Field::MaxCount as usize].parse().ok()?,
-    })
+    fn parse_from_data(data: &[String]) -> Option<Cooldown> {
+        // `.ok()` should be used when the field is never an empty string.
+        // `.unwrap_or()` should be used if compatibility with empty strings is required.
+        let duration: f64 = data[Field::Duration as usize].parse().ok()?;
+        let min_duration: f64 = data[Field::MinDuration as usize].parse().ok()?;
+        let max_duration: f64 = data[Field::MaxDuration as usize].parse().ok()?;
+        Some(Cooldown {
+            id: data[Field::ID as usize].parse().ok()?,
+            duration_frame: (duration * 16.0).round() as i32,
+            min_duration_frame: (min_duration * 16.0).round() as i32,
+            max_duration_frame: (max_duration * 16.0).round() as i32,
+            max_count: data[Field::MaxCount as usize].parse().ok()?,
+        })
+    }
 }
 
 /* tests */

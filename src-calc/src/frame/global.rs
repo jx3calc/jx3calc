@@ -15,6 +15,9 @@ pub trait SubTrait<T> {
     fn construct_from_tab(key: &T) -> Option<Self>
     where
         Self: Sized;
+    fn parse_from_data(data: &[String]) -> Option<Self>
+    where
+        Self: Sized;
 }
 
 struct ManagerItem<'a, K, V>
@@ -98,6 +101,11 @@ mod tests {
 
         fn construct_from_tab(key: &TestKey) -> Option<TestValue> {
             Some(TestValue(key.0 * 2))
+        }
+
+        fn parse_from_data(data: &[String]) -> Option<TestValue> {
+            let _ = data;
+            panic!("Not implemented");
         }
     }
 

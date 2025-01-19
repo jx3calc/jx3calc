@@ -44,19 +44,18 @@ impl super::SubTrait<i32> for Equipment {
                 return None;
             }
         };
-        parse_res(&res)
+        Self::parse_from_data(&res)
     }
-}
-
-fn parse_res(res: &[String]) -> Option<Equipment> {
-    Some(Equipment {
-        // `.ok()` should be used when the field is never an empty string.
-        // `.unwrap_or()` should be used if compatibility with empty strings is required.
-        id: res[TrinketField::ID as usize].parse().ok()?,
-        skill_id: res[TrinketField::SkillID as usize].parse().unwrap_or(0), // Maybe empty string
-        skill_level: res[TrinketField::SkillLevel as usize].parse().unwrap_or(0), // Maybe empty string
-        cooldown_id: res[TrinketField::CoolDownID as usize].parse().unwrap_or(0), // Maybe empty string
-    })
+    fn parse_from_data(data: &[String]) -> Option<Equipment> {
+        Some(Equipment {
+            // `.ok()` should be used when the field is never an empty string.
+            // `.unwrap_or()` should be used if compatibility with empty strings is required.
+            id: data[TrinketField::ID as usize].parse().ok()?,
+            skill_id: data[TrinketField::SkillID as usize].parse().unwrap_or(0), // Maybe empty string
+            skill_level: data[TrinketField::SkillLevel as usize].parse().unwrap_or(0), // Maybe empty string
+            cooldown_id: data[TrinketField::CoolDownID as usize].parse().unwrap_or(0), // Maybe empty string
+        })
+    }
 }
 
 /* tests */

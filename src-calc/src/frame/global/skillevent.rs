@@ -52,26 +52,25 @@ impl super::SubTrait<i32> for SkillEvent {
                 return None;
             }
         };
-        parse_res(&res)
+        Self::parse_from_data(&res)
     }
-}
-
-fn parse_res(res: &[String]) -> Option<SkillEvent> {
-    Some(SkillEvent {
-        // `.ok()` should be used when the field is never an empty string.
-        // `.unwrap_or()` should be used if compatibility with empty strings is required.
-        id: res[Field::ID as usize].parse().ok()?,
-        r#type: res[Field::EventType as usize].parse().ok()?,
-        odds: res[Field::Odds as usize].parse().ok()?,
-        skill_id: res[Field::SkillID as usize].parse().ok()?,
-        skill_level: res[Field::SkillLevel as usize].parse().ok()?,
-        skill_caster: res[Field::SkillCaster as usize].parse().ok()?,
-        skill_target: res[Field::SkillTarget as usize].parse().ok()?,
-        event_mask1: res[Field::EventMask1 as usize].parse().ok()?,
-        event_mask2: res[Field::EventMask2 as usize].parse().ok()?,
-        event_skill_id: res[Field::EventSkillID as usize].parse().ok()?,
-        // event_skill_level: res[Field::EventSkillLevel as usize].parse().ok()?,
-    })
+    fn parse_from_data(data: &[String]) -> Option<SkillEvent> {
+        Some(SkillEvent {
+            // `.ok()` should be used when the field is never an empty string.
+            // `.unwrap_or()` should be used if compatibility with empty strings is required.
+            id: data[Field::ID as usize].parse().ok()?,
+            r#type: data[Field::EventType as usize].parse().ok()?,
+            odds: data[Field::Odds as usize].parse().ok()?,
+            skill_id: data[Field::SkillID as usize].parse().ok()?,
+            skill_level: data[Field::SkillLevel as usize].parse().ok()?,
+            skill_caster: data[Field::SkillCaster as usize].parse().ok()?,
+            skill_target: data[Field::SkillTarget as usize].parse().ok()?,
+            event_mask1: data[Field::EventMask1 as usize].parse().ok()?,
+            event_mask2: data[Field::EventMask2 as usize].parse().ok()?,
+            event_skill_id: data[Field::EventSkillID as usize].parse().ok()?,
+            // event_skill_level: res[Field::EventSkillLevel as usize].parse().ok()?,
+        })
+    }
 }
 
 /* tests */
