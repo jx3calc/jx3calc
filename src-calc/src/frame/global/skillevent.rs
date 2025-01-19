@@ -10,7 +10,7 @@ use once_cell::sync::Lazy;
 /* static manager variable */
 static SKILL_EVENT: Lazy<super::Manager<i32, SkillEvent>> = Lazy::new(super::Manager::new);
 
-/* structs */
+/* struct */
 
 /// SkillEvent
 struct SkillEvent {

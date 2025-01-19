@@ -9,15 +9,9 @@ use once_cell::sync::Lazy;
 use strum::IntoEnumIterator;
 
 /* static manager variable */
-static BUFF: Lazy<super::Manager<BuffKey, Buff>> = Lazy::new(super::Manager::new);
+static BUFF: Lazy<super::Manager<(i32, i32), Buff>> = Lazy::new(super::Manager::new);
 
-/* structs */
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct BuffKey {
-    id: i32,
-    level: i32,
-}
+/* struct */
 
 /// Buff
 struct Buff {
@@ -64,12 +58,11 @@ struct Attrib {
 
 impl Buff {
     pub fn get(id: i32, level: i32) -> Option<&'static Buff> {
-        let key = BuffKey { id, level };
-        BUFF.get(&key)
+        BUFF.get(&(id, level))
     }
 }
 
-impl super::SubTrait<BuffKey> for Buff {
+impl super::SubTrait<(i32, i32)> for Buff {
     fn struct_name() -> &'static str {
         "Buff"
     }
@@ -81,8 +74,8 @@ impl super::SubTrait<BuffKey> for Buff {
         }
         UI::tab_init();
     }
-    fn construct_from_tab(key: &BuffKey) -> Option<Self> {
-        let res = match tab_get("buff.tab", &[&key.id.to_string(), &key.level.to_string()]) {
+    fn construct_from_tab(key: &(i32, i32)) -> Option<Self> {
+        let res = match tab_get("buff.tab", &[&key.0.to_string(), &key.1.to_string()]) {
             Ok(res) => res,
             Err(e) => {
                 error!("[global::buff] {:?} not found:\n{}", key, e);
@@ -155,7 +148,7 @@ fn parse_res(res: &[String]) -> Option<Buff> {
     Some(buff)
 }
 
-impl super::SubTrait<BuffKey> for UI {
+impl super::SubTrait<(i32, i32)> for UI {
     fn struct_name() -> &'static str {
         "BuffUI"
     }
@@ -166,8 +159,8 @@ impl super::SubTrait<BuffKey> for UI {
             error!("[global::buffui] Tab init failed");
         }
     }
-    fn construct_from_tab(key: &BuffKey) -> Option<Self> {
-        let res = tab_get("buff.txt", &[&key.id.to_string(), &key.level.to_string()]).ok()?;
+    fn construct_from_tab(key: &(i32, i32)) -> Option<Self> {
+        let res = tab_get("buff.txt", &[&key.0.to_string(), &key.1.to_string()]).ok()?;
         Some(UI {
             id: res[UIField::BuffID as usize].parse().ok()?,
             level: res[UIField::Level as usize].parse().ok()?,

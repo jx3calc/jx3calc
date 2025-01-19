@@ -9,7 +9,7 @@ use once_cell::sync::Lazy;
 /* static manager variable */
 static TRINKET: Lazy<super::Manager<i32, Item>> = Lazy::new(super::Manager::new);
 
-/* structs */
+/* struct */
 
 /// Item
 struct Item {

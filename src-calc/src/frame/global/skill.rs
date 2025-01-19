@@ -128,10 +128,10 @@ struct Attribute {
 }
 
 enum CheckBuffType {
-    This,
-    Dest,
-    ThisOwn,
-    DestOwn,
+    CheckSelf,
+    CheckDest,
+    CheckSelfOwn,
+    ChekDestOwn,
 }
 
 struct CheckBuff {

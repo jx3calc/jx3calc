@@ -7,16 +7,9 @@ use once_cell::sync::Lazy;
 // TODO: 目前没有做技能处理
 
 /* static manager variable */
-static SKILL_RECIPE: Lazy<super::Manager<SkillRecipeKey, SkillRecipe>> =
-    Lazy::new(super::Manager::new);
+static SKILL_RECIPE: Lazy<super::Manager<(i32, i32), SkillRecipe>> = Lazy::new(super::Manager::new);
 
-/* structs */
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct SkillRecipeKey {
-    id: i32,
-    level: i32,
-}
+/* struct */
 
 /// SkillRecipe
 struct SkillRecipe {
@@ -35,12 +28,11 @@ struct SkillRecipe {
 
 impl SkillRecipe {
     pub fn get(id: i32, level: i32) -> Option<&'static SkillRecipe> {
-        let key = SkillRecipeKey { id, level };
-        SKILL_RECIPE.get(&key)
+        SKILL_RECIPE.get(&(id, level))
     }
 }
 
-impl super::SubTrait<SkillRecipeKey> for SkillRecipe {
+impl super::SubTrait<(i32, i32)> for SkillRecipe {
     fn struct_name() -> &'static str {
         "SkillRecipe"
     }
@@ -55,11 +47,8 @@ impl super::SubTrait<SkillRecipeKey> for SkillRecipe {
             error!("[global::skillrecipe] Tab init failed");
         }
     }
-    fn construct_from_tab(key: &SkillRecipeKey) -> Option<Self> {
-        let res = match tab_get(
-            "recipeskill.tab",
-            &[&key.id.to_string(), &key.level.to_string()],
-        ) {
+    fn construct_from_tab(key: &(i32, i32)) -> Option<Self> {
+        let res = match tab_get("recipeskill.tab", &[&key.0.to_string(), &key.1.to_string()]) {
             Ok(res) => res,
             Err(e) => {
                 error!("[global::skillrecipe] {:?} not found:\n{}", key, e);

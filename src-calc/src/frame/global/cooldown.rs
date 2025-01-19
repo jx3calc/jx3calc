@@ -7,7 +7,7 @@ use once_cell::sync::Lazy;
 /* static manager variable */
 static COOLDOWN: Lazy<super::Manager<i32, Cooldown>> = Lazy::new(super::Manager::new);
 
-/* structs */
+/* struct */
 
 /// Cooldown
 struct Cooldown {
