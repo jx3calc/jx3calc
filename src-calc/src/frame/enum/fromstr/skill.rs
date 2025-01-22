@@ -1,6 +1,6 @@
 use super::*;
 
-common_enum! { KindType {
+enumfromstr! { KindType {
     None,
     Physics,
     SolarMagic,
@@ -11,7 +11,7 @@ common_enum! { KindType {
     Adaptive,
 }}
 
-common_enum! { CastMode {
+enumfromstr! { CastMode {
     CasterArea,
     CasterAreaOfAttention,
     CasterAreaOfDepth,

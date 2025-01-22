@@ -1,6 +1,6 @@
 use super::*;
 
-common_enum! { Type {
+enumfromstr! { Type {
     BeCast,
     BeCriticalStrike,
     BeDodge,
@@ -22,7 +22,7 @@ common_enum! { Type {
     PreCast,
 }}
 
-common_enum! { Role {
+enumfromstr! { Role {
     EventCaster,
     EventTarget,
 }}

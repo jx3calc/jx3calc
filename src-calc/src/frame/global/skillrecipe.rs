@@ -42,14 +42,14 @@ impl super::SubTrait<(i32, i32)> for SkillRecipe {
             &["RecipeID", "RecipeLevel"],
             &fields,
         ) {
-            error!("[global::skillrecipe] Tab init failed");
+            error!("Tab init failed");
         }
     }
     fn construct_from_tab(key: &(i32, i32)) -> Option<Vec<String>> {
         match tab_get("recipeskill.tab", &[&key.0.to_string(), &key.1.to_string()]) {
             Ok(res) => Some(res),
             Err(e) => {
-                error!("[global::skillrecipe] {:?} not found:\n{}", key, e);
+                error!("{:?} not found:\n{}", key, e);
                 None
             }
         }

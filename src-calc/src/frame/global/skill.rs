@@ -14,7 +14,7 @@ static SKILL_DATA: Lazy<super::Manager<i32, SkillData>> = Lazy::new(super::Manag
 
 /* struct */
 
-type SkillData = Vec<String>;
+struct SkillData(Vec<String>);
 
 /// Skill
 pub struct Skill {
@@ -193,20 +193,20 @@ impl super::SubTrait<i32> for SkillData {
         let fields = Field::to_fields();
         let fields: Vec<&str> = fields.iter().map(|s| s.as_str()).collect();
         if !tab_init("settings/skill/skills.tab", &["SkillID"], &fields) {
-            error!("[global::skill] Tab init failed");
+            error!("Tab init failed");
         }
     }
     fn construct_from_tab(key: &i32) -> Option<Vec<String>> {
         match tab_get("skills.tab", &[&key.to_string()]) {
             Ok(res) => Some(res),
             Err(e) => {
-                error!("[global::skilldata] {:?} not found:\n{}", key, e);
+                error!("{:?} not found:\n{}", key, e);
                 None
             }
         }
     }
     fn parse_from_data(data: &[String]) -> Option<SkillData> {
-        Some(data.to_vec())
+        Some(SkillData(data.to_vec()))
     }
 }
 
@@ -221,7 +221,7 @@ impl super::SubTrait<(i32, i32)> for Skill {
     fn construct_from_tab(key: &(i32, i32)) -> Option<Vec<String>> {
         match SKILL_DATA.get(&(key.0)) {
             Some(res) => {
-                let mut res = res.clone();
+                let mut res = res.0.clone();
                 res.push(key.1.to_string());
                 match UI::construct_from_tab(key) {
                     Some(mut ui) => {
@@ -232,7 +232,7 @@ impl super::SubTrait<(i32, i32)> for Skill {
                 }
             }
             None => {
-                error!("[global::skill] {:?} data get error.", key);
+                error!("{:?} data get error.", key);
                 None
             }
         }
@@ -340,6 +340,19 @@ impl super::SubTrait<(i32, i32)> for Skill {
         let level: i32 = data[count].parse().ok()?; // Will not fail
         skill.level = if level > 0 { level } else { skill.max_level };
 
+        // 处理 ScriptFile
+        let scriptfile = format!("scripts/skill/{}", &data[Field::ScriptFile as usize]);
+        match skill.get_skill_level_data(&scriptfile) {
+            Ok(_) => {}
+            Err(e) => {
+                error!(
+                    "{}, {} GetSkillLevelData failed:\n{}",
+                    skill.id, skill.level, e
+                );
+                return None;
+            }
+        }
+
         // 处理 UI
         if count + 1 < data.len() {
             skill.name = UI::parse_from_data(&data[count + 1..]).map(|ui| ui.0);
@@ -356,14 +369,14 @@ impl super::SubTrait<(i32, i32)> for UI {
     fn tab_init() {
         let fields = vec!["Name"];
         if !tab_init("ui/scheme/case/skill.txt", &["SkillID", "Level"], &fields) {
-            error!("[global::skillui] Tab init failed");
+            error!("Tab init failed");
         }
     }
     fn construct_from_tab(key: &(i32, i32)) -> Option<Vec<String>> {
         match tab_get("skill.txt", &[&key.0.to_string(), &key.1.to_string()]) {
             Ok(res) => Some(res),
             Err(e) => {
-                error!("[global::skillui] {:?} not found:\n{}", key, e);
+                error!("{:?} not found:\n{}", key, e);
                 None
             }
         }

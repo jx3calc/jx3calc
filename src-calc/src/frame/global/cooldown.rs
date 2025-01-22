@@ -32,14 +32,14 @@ impl super::SubTrait<i32> for Cooldown {
         let fields = Field::to_fields();
         let fields: Vec<&str> = fields.iter().map(|s| s.as_str()).collect();
         if !tab_init("settings/cooldownlist.tab", &["ID"], &fields) {
-            error!("[global::cooldown] Tab init failed");
+            error!("Tab init failed");
         }
     }
     fn construct_from_tab(key: &i32) -> Option<Vec<String>> {
         match tab_get("cooldownlist.tab", &[&key.to_string()]) {
             Ok(res) => Some(res),
             Err(e) => {
-                error!("[global::cooldown] {:?} not found:\n{}", key, e);
+                error!("{:?} not found:\n{}", key, e);
                 None
             }
         }

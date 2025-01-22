@@ -40,7 +40,7 @@ enum AttribValue {
     String(String),
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Eq, PartialEq)]
 struct Attrib {
     r#type: RefAttrib,
     value_a: AttribValue,
@@ -61,7 +61,7 @@ impl super::SubTrait<(i32, i32)> for Buff {
         let fields = Field::to_fields();
         let fields: Vec<&str> = fields.iter().map(|s| s.as_str()).collect();
         if !tab_init("settings/skill/buff.tab", &["ID", "Level"], &fields) {
-            error!("[global::buff] Tab init failed");
+            error!("Tab init failed");
         }
         UI::tab_init();
     }
@@ -75,7 +75,7 @@ impl super::SubTrait<(i32, i32)> for Buff {
                 None => Some(res),
             },
             Err(e) => {
-                error!("[global::buff] {:?} not found:\n{}", key, e);
+                error!("{:?} not found:\n{}", key, e);
                 None
             }
         }
@@ -112,7 +112,7 @@ impl super::SubTrait<(i32, i32)> for Buff {
                 let attrib = match RefAttrib::from_str(attrib) {
                     Ok(v) => v,
                     Err(_) => {
-                        error!("[global::buff] Unregistered attrib: {}", attrib);
+                        error!("Unregistered attrib: {}", attrib);
                         continue;
                     }
                 };
@@ -155,14 +155,14 @@ impl super::SubTrait<(i32, i32)> for UI {
     fn tab_init() {
         let fields = vec!["Name"];
         if !tab_init("ui/scheme/case/buff.txt", &["BuffID", "Level"], &fields) {
-            error!("[global::buffui] Tab init failed");
+            error!("Tab init failed");
         }
     }
     fn construct_from_tab(key: &(i32, i32)) -> Option<Vec<String>> {
         match tab_get("buff.txt", &[&key.0.to_string(), &key.1.to_string()]) {
             Ok(res) => Some(res),
             Err(e) => {
-                error!("[global::buffui] {:?} not found:\n{}", key, e);
+                error!("{:?} not found:\n{}", key, e);
                 None
             }
         }

@@ -1,3 +1,6 @@
 [workspace]
 members = ["src-tauri", "src-calc", "src-pak"]
 resolver = "2"
+
+[patch.crates-io]
+lua-src = { git = "https://github.com/jx3calc/lua-src-rs.git" }

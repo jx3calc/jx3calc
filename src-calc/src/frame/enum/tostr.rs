@@ -2,7 +2,7 @@ use strum::IntoEnumIterator;
 use strum_macros::{Display, EnumIter};
 
 #[allow(non_camel_case_types)]
-#[derive(EnumIter, Display)]
+#[derive(Display, EnumIter)]
 pub enum Buff {
     ID,
     Level,
@@ -43,10 +43,10 @@ impl Buff {
     }
 }
 
-macro_rules! common_enum {
+macro_rules! enumtostr {
     ($name:ident { $($variant:ident),* $(,)? }) => {
         #[allow(non_camel_case_types)]
-        #[derive(EnumIter, Display)]
+        #[derive(Display, EnumIter)]
         pub enum $name {
             $($variant),*
         }
@@ -59,7 +59,7 @@ macro_rules! common_enum {
     };
 }
 
-common_enum! { Cooldown {
+enumtostr! { Cooldown {
     ID,
     Duration,
     MinDuration,
@@ -67,14 +67,14 @@ common_enum! { Cooldown {
     MaxCount,
 }}
 
-common_enum! { CustomTrinket {
+enumtostr! { CustomTrinket {
     ID,
     SkillID,
     SkillLevel,
     CoolDownID,
 }}
 
-common_enum! { SkillEvent {
+enumtostr! { SkillEvent {
     ID,
     EventType,
     Odds,
@@ -87,7 +87,7 @@ common_enum! { SkillEvent {
     EventSkillID,
 }}
 
-common_enum! { SkillRecipe {
+enumtostr! { SkillRecipe {
     RecipeID,
     RecipeLevel,
     SkillRecipeType,
@@ -99,7 +99,7 @@ common_enum! { SkillRecipe {
     ScriptFile,
 }}
 
-common_enum! { Skill {
+enumtostr! { Skill {
     SkillID,
     MaxLevel,
     KindType,

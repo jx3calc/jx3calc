@@ -33,14 +33,14 @@ impl super::SubTrait<i32> for Equipment {
         let fields = TrinketField::to_fields();
         let fields: Vec<&str> = fields.iter().map(|s| s.as_str()).collect();
         if !tab_init("settings/item/custom_trinket.tab", &["ID"], &fields) {
-            error!("[global::equipment] Tab init failed: Trinket");
+            error!("Tab init failed: Trinket");
         }
     }
     fn construct_from_tab(key: &i32) -> Option<Vec<String>> {
         match tab_get("custom_trinket.tab", &[&key.to_string()]) {
             Ok(res) => Some(res),
             Err(e) => {
-                error!("[global::equipment] {:?} not found:\n{}", key, e);
+                error!("{:?} not found:\n{}", key, e);
                 None
             }
         }
