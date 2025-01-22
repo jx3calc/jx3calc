@@ -1,8 +1,7 @@
-pub(super) mod skill;
-
 mod buff;
 mod cooldown;
 mod equipment;
+mod skill;
 mod skillevent;
 mod skillrecipe;
 

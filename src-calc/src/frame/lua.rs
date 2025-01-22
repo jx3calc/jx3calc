@@ -1,5 +1,4 @@
 mod global;
-mod skill;
 
 use crate::frame::r#enum::xlua;
 use pak::lua_get;
