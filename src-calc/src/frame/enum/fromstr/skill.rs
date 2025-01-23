@@ -11,6 +11,12 @@ enumfromstr! { KindType {
     Adaptive,
 }}
 
+impl Default for KindType {
+    fn default() -> Self {
+        KindType::None
+    }
+}
+
 enumfromstr! { CastMode {
     CasterArea,
     CasterAreaOfAttention,
@@ -40,3 +46,9 @@ enumfromstr! { CastMode {
     TargetSingle,
     TargetTeamArea,
 }}
+
+impl Default for CastMode {
+    fn default() -> Self {
+        CastMode::TargetSingle
+    }
+}

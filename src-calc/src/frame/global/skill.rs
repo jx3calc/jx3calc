@@ -22,9 +22,11 @@ static SKILL_DATA: Lazy<super::Manager<i32, SkillData>> = Lazy::new(super::Manag
 struct SkillData(Vec<String>);
 
 /// Skill
+#[allow(non_snake_case)]
+#[derive(Default)]
 pub struct Skill {
     id: i32,
-    level: i64,
+    dwLevel: i32,
     name: Option<String>,
 
     max_level: i32,
@@ -54,80 +56,87 @@ pub struct Skill {
     delay_sub_skills: Vec<DelaySubSkill>,
 
     // 经验升级相关
-    dw_level_up_exp: i64,      // 升级经验
-    n_exp_add_odds: i64,       // 技能熟练度增长概率
-    n_player_level_limit: i64, // 角色可以学会该技能所必须达到的最低等级
+    dwLevelUpExp: i32,      // 升级经验
+    nExpAddOdds: i32,       // 技能熟练度增长概率
+    nPlayerLevelLimit: i32, // 角色可以学会该技能所必须达到的最低等级
 
     // 技能仇恨
-    n_base_threat: i64,
+    nBaseThreat: i32,
 
     // 技能消耗
-    n_cost_life: i64,              // 技能消耗生命值
-    n_cost_mana: i64,              // 技能消耗的内力
-    n_cost_stamina: i64,           // 技能消耗的体力
-    n_cost_item_type: i64,         // 技能消耗的物品类型
-    n_cost_item_index: i64,        // 技能消耗的物品索引ID
-    n_cost_mana_base_percent: i64, // 技能消耗的内力百分比
-    n_cost_sprint_power: i64,      // 技能消耗气力值
+    nCostLife: i32,            // 技能消耗生命值
+    nCostMana: i32,            // 技能消耗的内力
+    nCostStamina: i32,         // 技能消耗的体力
+    nCostItemType: i32,        // 技能消耗的物品类型
+    nCostItemIndex: i32,       // 技能消耗的物品索引ID
+    nCostManaBasePercent: i32, // 技能消耗的内力百分比
+    nCostSprintPower: i32,     // 技能消耗气力值
 
     // 聚气相关
-    b_is_accumulate: bool, // 技能是否需要聚气
+    bIsAccumulate: bool, // 技能是否需要聚气
 
     // 链状技能相关
-    n_chain_branch: i64, // 链状技能分支数
-    n_chain_depth: i64,  // 链状技能层数
+    nChainBranch: i32, // 链状技能分支数
+    nChainDepth: i32,  // 链状技能层数
 
     // 施放距离
-    n_min_radius: i64, // 技能施放的最小距离
-    n_max_radius: i64, // 技能施放的最大距离
+    nMinRadius: i32, // 技能施放的最小距离
+    nMaxRadius: i32, // 技能施放的最大距离
 
     // 作用范围
-    n_protect_radius: i64, // 环形和矩形AOE的保护距离，范围内不受伤害
-    n_height: i64, // AOE的高度，全高，圆柱体AOE中不填为2倍的nAreaRadius，矩形AOE中不填为nAreaRadius
-    n_rect_width: i64, // 矩形AOE的宽度，全宽，不填为nAreaRadius
-    n_angle_range: i64, // 攻击范围的扇形角度范围
-    b_full_angle_in_air: bool,
-    n_area_radius: i64,           // 技能作用半径
-    n_target_count_limit: i64,    // 技能作用目标数量限制,(小于0代表目标数量不限制)
-    b_ignore_prepare_state: bool, // 技能是否可在吟唱中施放，吟唱、通道、蓄力技不能填true
+    nProtectRadius: i32, // 环形和矩形AOE的保护距离，范围内不受伤害
+    nHeight: i32, // AOE的高度，全高，圆柱体AOE中不填为2倍的nAreaRadius，矩形AOE中不填为nAreaRadius
+    nRectWidth: i32, // 矩形AOE的宽度，全宽，不填为nAreaRadius
+    nAngleRange: i32, // 攻击范围的扇形角度范围
+    bFullAngleInAir: bool,
+    nAreaRadius: i32,          // 技能作用半径
+    nTargetCountLimit: i32,    // 技能作用目标数量限制,(小于0代表目标数量不限制)
+    bIgnorePrepareState: bool, // 技能是否可在吟唱中施放，吟唱、通道、蓄力技不能填true
 
     // 时间相关
-    n_prepare_frames: i64,   // 吟唱帧数
-    n_channel_interval: i64, // 通道技间隔时间
-    n_channel_frame: i64,    // 通道技持续时间，单位帧数
-    n_bullet_velocity: i64,  // 子弹速度，单位 点/帧
+    nPrepareFrames: i32,   // 吟唱帧数
+    nChannelInterval: i32, // 通道技间隔时间
+    nChannelFrame: i32,    // 通道技持续时间，单位帧数
+    nBulletVelocity: i32,  // 子弹速度，单位 点/帧
 
     // 阵法相关
-    b_is_sun_moon_power: bool,         // 技能是否需要日月豆
-    sun_subsection_skill_id: i32,      // 日豆技能ID
-    sun_subsection_skill_level: i32,   // 日豆技能等级
-    moon_subsection_skill_id: i32,     // 月豆技能ID
-    moon_subsection_skill_level: i32,  // 月豆技能等级
-    b_is_formation_skill: bool,        // 是否阵眼技能
-    n_formation_range: i64,            // 结阵的范围
-    n_least_formation_population: i64, // 结阵的范围的最少队员数（包括队长）
+    bIsSunMoonPower: bool,            // 技能是否需要日月豆
+    sun_subsection_skill_id: i32,     // 日豆技能ID
+    sun_subsection_skill_level: i32,  // 日豆技能等级
+    moon_subsection_skill_id: i32,    // 月豆技能ID
+    moon_subsection_skill_level: i32, // 月豆技能等级
+    bIsFormationSkill: bool,          // 是否阵眼技能
+    nFormationRange: i32,             // 结阵的范围
+    nLeastFormationPopulation: i32,   // 结阵的范围的最少队员数（包括队长）
 
     // 目标血量需求
-    n_target_life_percent_min: i64, // 血量最小值>=
-    n_target_life_percent_max: i64, // 血量最大值<=
+    nTargetLifePercentMin: i32, // 血量最小值>=
+    nTargetLifePercentMax: i32, // 血量最大值<=
 
     // 自身血量需求
-    n_self_life_percent_min: i64, // 血量最小值>=
-    n_self_life_percent_max: i64, // 血量最大值<=
+    nSelfLifePercentMin: i32, // 血量最小值>=
+    nSelfLifePercentMax: i32, // 血量最大值<=
 
     // 打退打断落马相关
-    n_beat_back_rate: i64,   // 技能被打退的概率,默认1024
-    n_broken_rate: i64,      // 技能被打断的概率,默认1024
-    n_break_rate: i64,       // 打断目标施法的概率,基数1024
-    n_dismounting_rate: i64, // 将目标击落下马几率,基数1024，默认0
+    nBeatBackRate: i32,    // 技能被打退的概率,默认1024
+    nBrokenRate: i32,      // 技能被打断的概率,默认1024
+    nBreakRate: i32,       // 打断目标施法的概率,基数1024
+    nDismountingRate: i32, // 将目标击落下马几率,基数1024，默认0
 
     // 武器伤害相关
-    n_weapon_damage_percent: i64, // 武器伤害百分比,对外功伤害有用。填0表示此次外功攻击不计算武器伤害,1024为100%
+    nWeaponDamagePercent: i32, // 武器伤害百分比,对外功伤害有用。填0表示此次外功攻击不计算武器伤害,1024为100%
 }
 
 /* sub structs */
 
 struct UI(String);
+
+#[allow(non_snake_case)]
+struct SkillUserdata {
+    skill: Skill,
+    AddAttribute: mlua::Value,
+    _marker: std::marker::PhantomPinned,
+}
 
 #[derive(Debug, PartialEq, Eq)]
 enum AttributeValue {
@@ -171,6 +180,7 @@ struct BindBuffItem {
 
 type BindBuff = [Option<BindBuffItem>; 4];
 
+#[derive(Default)]
 struct Cooldown {
     public: Option<i32>,
     normal: [Option<i32>; 3],
@@ -266,66 +276,7 @@ impl super::SubTrait<(i32, i32)> for Skill {
             target_relation_enemy: data[Field::TargetRelationEnemy as usize] == "1",
             recipe_type: data[Field::RecipeType as usize].parse().unwrap_or(0),
             is_frost: data[Field::IsFrost as usize] == "1",
-
-            level: 0,
-            name: None,
-            attributes: Vec::new(),
-            check_buffs: Vec::new(),
-            check_self_learnt_skills: Vec::new(),
-            bind_buff: [const { None }; 4],
-            cooldown: Cooldown {
-                public: None,
-                normal: [None; 3],
-                normal_add: [0; 3],
-                check: [None; 3],
-            },
-            delay_sub_skills: Vec::new(),
-
-            dw_level_up_exp: 0,
-            n_exp_add_odds: 0,
-            n_player_level_limit: 0,
-            n_base_threat: 0,
-            n_cost_life: 0,
-            n_cost_mana: 0,
-            n_cost_stamina: 0,
-            n_cost_item_type: 0,
-            n_cost_item_index: 0,
-            n_cost_mana_base_percent: 0,
-            n_cost_sprint_power: 0,
-            b_is_accumulate: false,
-            n_chain_branch: 0,
-            n_chain_depth: 0,
-            n_min_radius: 0,
-            n_max_radius: 0,
-            n_protect_radius: 0,
-            n_height: 0,
-            n_rect_width: 0,
-            n_angle_range: 0,
-            b_full_angle_in_air: false,
-            n_area_radius: 0,
-            n_target_count_limit: 0,
-            b_ignore_prepare_state: false,
-            n_prepare_frames: 0,
-            n_channel_interval: 0,
-            n_channel_frame: 0,
-            n_bullet_velocity: 0,
-            b_is_sun_moon_power: false,
-            sun_subsection_skill_id: 0,
-            sun_subsection_skill_level: 0,
-            moon_subsection_skill_id: 0,
-            moon_subsection_skill_level: 0,
-            b_is_formation_skill: false,
-            n_formation_range: 0,
-            n_least_formation_population: 0,
-            n_target_life_percent_min: 0,
-            n_target_life_percent_max: 0,
-            n_self_life_percent_min: 0,
-            n_self_life_percent_max: 0,
-            n_beat_back_rate: 0,
-            n_broken_rate: 0,
-            n_break_rate: 0,
-            n_dismounting_rate: 0,
-            n_weapon_damage_percent: 0,
+            ..Default::default()
         };
 
         // 处理默认武器伤害.
@@ -337,26 +288,25 @@ impl super::SubTrait<(i32, i32)> for Skill {
         // 暂时按照该推测进行处理.
         let weapon_request = &data[Field::WeaponRequest as usize];
         if !weapon_request.is_empty() && weapon_request != "0" {
-            skill.n_weapon_damage_percent = 1024;
+            skill.nWeaponDamagePercent = 1024;
         }
 
         // 处理 level
         let count = Field::iter().count();
         let level: i32 = data[count].parse().ok()?; // Will not fail
-        skill.level = if level > 0 { level } else { skill.max_level } as i64;
+        skill.dwLevel = if level > 0 { level } else { skill.max_level };
 
         // 处理 ScriptFile
+        let (id, level) = (skill.id, skill.dwLevel as i32);
         let scriptfile = format!("scripts/skill/{}", &data[Field::ScriptFile as usize]);
-        match skill.get_skill_level_data(&scriptfile) {
-            Ok(_) => {}
+        let res = SkillUserdata::get_skill_level_data(skill, &scriptfile);
+        let mut skill = match res {
+            Ok(r) => r,
             Err(e) => {
-                error!(
-                    "{}, {} GetSkillLevelData failed:\n{}",
-                    skill.id, skill.level, e
-                );
+                error!("{}, {} GetSkillLevelData failed:\n{}", id, level, e);
                 return None;
             }
-        }
+        };
 
         // 处理 UI
         if count + 1 < data.len() {
@@ -391,8 +341,77 @@ impl super::SubTrait<(i32, i32)> for UI {
     }
 }
 
-impl Skill {
-    fn get_skill_level_data(&mut self, scriptfile: &str) -> mlua::Result<()> {
+impl mlua::UserData for SkillUserdata {
+    fn add_fields<F: mlua::UserDataFields<Self>>(fields: &mut F) {
+        macro_rules! add_skill_fields {
+            ($fields:expr, $($field:ident),*) => {
+                $(
+                    $fields.add_field_method_get(stringify!($field), |_, this| Ok(this.skill.$field));
+                    $fields.add_field_method_set(stringify!($field), |_, this, value| {
+                        this.skill.$field = value;
+                        Ok(())
+                    });
+                )*
+            };
+        }
+        add_skill_fields!(
+            fields,
+            dwLevel,
+            dwLevelUpExp,
+            nExpAddOdds,
+            nPlayerLevelLimit,
+            nBaseThreat,
+            nCostLife,
+            nCostMana,
+            nCostStamina,
+            nCostItemType,
+            nCostItemIndex,
+            nCostManaBasePercent,
+            nCostSprintPower,
+            bIsAccumulate,
+            nChainBranch,
+            nChainDepth,
+            nMinRadius,
+            nMaxRadius,
+            nProtectRadius,
+            nHeight,
+            nRectWidth,
+            nAngleRange,
+            bFullAngleInAir,
+            nAreaRadius,
+            nTargetCountLimit,
+            bIgnorePrepareState,
+            nPrepareFrames,
+            nChannelInterval,
+            nChannelFrame,
+            nBulletVelocity,
+            bIsSunMoonPower,
+            bIsFormationSkill,
+            nFormationRange,
+            nLeastFormationPopulation,
+            nTargetLifePercentMin,
+            nTargetLifePercentMax,
+            nSelfLifePercentMin,
+            nSelfLifePercentMax,
+            nBeatBackRate,
+            nBrokenRate,
+            nBreakRate,
+            nDismountingRate,
+            nWeaponDamagePercent
+        );
+        macro_rules! add_functions {
+            ($fields:expr, $($field:ident),*) => {
+                $(
+                    $fields.add_field_method_get(stringify!($field), |_, this| Ok(this.$field.clone()));
+                )*
+            };
+        }
+        add_functions!(fields, AddAttribute);
+    }
+}
+
+impl SkillUserdata {
+    fn get_skill_level_data(skill: Skill, scriptfile: &str) -> Result<Skill, mlua::Error> {
         let lua_func = lua::get_func(scriptfile, FuncName::GetSkillLevelData)?.ok_or(
             mlua::Error::external(format!(
                 "[global::skill] No GetSkillLevelData function in {}",
@@ -400,37 +419,31 @@ impl Skill {
             )),
         )?;
 
-        let skill = lua::create_table()?;
-        let meta = lua::create_table()?;
-        let r0 = self as *mut Skill;
-        let r1 = self as *const Skill;
-
+        let mut ud = SkillUserdata {
+            skill,
+            AddAttribute: mlua::Value::Nil,
+            _marker: std::marker::PhantomPinned,
+        };
+        let ptr = &mut ud.skill as *mut Skill;
         lua::scope(|scope| {
-            let add_attr = scope.create_function_mut(|_, (a, b, c, d)| -> mlua::Result<()> {
-                unsafe { Skill::add_attribute(r0, a, b, c, d) }
+            let add_attribute = scope.create_function(|_, (a, b, c, d)| -> mlua::Result<()> {
+                let this = unsafe { &mut *ptr };
+                this.add_attribute(a, b, c, d)
             })?;
-            skill.set("AddAttribute", add_attr)?;
+            ud.AddAttribute = mlua::Value::Function(add_attribute);
 
-            type GT = (mlua::Table, String);
-            let getter = scope.create_function(|_, (_, k): GT| -> mlua::Result<mlua::Value> {
-                unsafe { Skill::getter(r1, k) }
-            })?;
-            type ST = (mlua::Table, String, mlua::Value);
-            let setter = scope.create_function_mut(|_, (_, k, v): ST| -> mlua::Result<()> {
-                unsafe { Skill::setter(r0, k, v) }
-            })?;
-            meta.set("__index", getter).unwrap();
-            meta.set("__newindex", setter).unwrap();
-            skill.set_metatable(Some(meta));
-
-            lua_func.call::<mlua::Value>(skill)?;
+            let udr = scope.create_userdata_ref_mut(&mut ud)?;
+            lua_func.call::<mlua::Value>(udr)?;
             Ok(())
         })?;
-        Ok(())
-    }
 
-    unsafe fn add_attribute(
-        skill: *mut Skill,
+        Ok(ud.skill)
+    }
+}
+
+impl Skill {
+    fn add_attribute(
+        &mut self,
         a: mlua::Value,
         b: mlua::Value,
         c: mlua::Value,
@@ -448,127 +461,12 @@ impl Skill {
             mlua::Value::String(v) => AttributeValue::Str(v.clone().to_string_lossy()),
             _ => return Err(mlua::Error::runtime("param2 is not integer or string")),
         };
-        (*skill).attributes.push(Attribute {
+        self.attributes.push(Attribute {
             mode,
             r#type,
             param1,
             param2,
         });
-        Ok(())
-    }
-
-    unsafe fn getter(skill: *const Skill, k: String) -> mlua::Result<mlua::Value> {
-        println!("getter: {}", k);
-        let s = &*skill;
-        let res = match k.as_str() {
-            "dwLevel" => mlua::Value::Integer(s.level),
-            "dwLevelUpExp" => mlua::Value::Integer(s.dw_level_up_exp),
-            "nExpAddOdds" => mlua::Value::Integer(s.n_exp_add_odds),
-            "nPlayerLevelLimit" => mlua::Value::Integer(s.n_player_level_limit),
-            "nBaseThreat" => mlua::Value::Integer(s.n_base_threat),
-            "nCostLife" => mlua::Value::Integer(s.n_cost_life),
-            "nCostMana" => mlua::Value::Integer(s.n_cost_mana),
-            "nCostStamina" => mlua::Value::Integer(s.n_cost_stamina),
-            "nCostItemType" => mlua::Value::Integer(s.n_cost_item_type),
-            "nCostItemIndex" => mlua::Value::Integer(s.n_cost_item_index),
-            "nCostManaBasePercent" => mlua::Value::Integer(s.n_cost_mana_base_percent),
-            "nCostSprintPower" => mlua::Value::Integer(s.n_cost_sprint_power),
-            "bIsAccumulate" => mlua::Value::Boolean(s.b_is_accumulate),
-            "nChainBranch" => mlua::Value::Integer(s.n_chain_branch),
-            "nChainDepth" => mlua::Value::Integer(s.n_chain_depth),
-            "nMinRadius" => mlua::Value::Integer(s.n_min_radius),
-            "nMaxRadius" => mlua::Value::Integer(s.n_max_radius),
-            "nProtectRadius" => mlua::Value::Integer(s.n_protect_radius),
-            "nHeight" => mlua::Value::Integer(s.n_height),
-            "nRectWidth" => mlua::Value::Integer(s.n_rect_width),
-            "nAngleRange" => mlua::Value::Integer(s.n_angle_range),
-            "bFullAngleInAir" => mlua::Value::Boolean(s.b_full_angle_in_air),
-            "nAreaRadius" => mlua::Value::Integer(s.n_area_radius),
-            "nTargetCountLimit" => mlua::Value::Integer(s.n_target_count_limit),
-            "bIgnorePrepareState" => mlua::Value::Boolean(s.b_ignore_prepare_state),
-            "nPrepareFrames" => mlua::Value::Integer(s.n_prepare_frames),
-            "nChannelInterval" => mlua::Value::Integer(s.n_channel_interval),
-            "nChannelFrame" => mlua::Value::Integer(s.n_channel_frame),
-            "nBulletVelocity" => mlua::Value::Integer(s.n_bullet_velocity),
-            "bIsSunMoonPower" => mlua::Value::Boolean(s.b_is_sun_moon_power),
-            "bIsFormationSkill" => mlua::Value::Boolean(s.b_is_formation_skill),
-            "nFormationRange" => mlua::Value::Integer(s.n_formation_range),
-            "nLeastFormationPopulation" => mlua::Value::Integer(s.n_least_formation_population),
-            "nTargetLifePercentMin" => mlua::Value::Integer(s.n_target_life_percent_min),
-            "nTargetLifePercentMax" => mlua::Value::Integer(s.n_target_life_percent_max),
-            "nSelfLifePercentMin" => mlua::Value::Integer(s.n_self_life_percent_min),
-            "nSelfLifePercentMax" => mlua::Value::Integer(s.n_self_life_percent_max),
-            "nBeatBackRate" => mlua::Value::Integer(s.n_beat_back_rate),
-            "nBrokenRate" => mlua::Value::Integer(s.n_broken_rate),
-            "nBreakRate" => mlua::Value::Integer(s.n_break_rate),
-            "nDismountingRate" => mlua::Value::Integer(s.n_dismounting_rate),
-            "nWeaponDamagePercent" => mlua::Value::Integer(s.n_weapon_damage_percent),
-            _ => mlua::Value::Nil,
-        };
-        Ok(res)
-    }
-
-    unsafe fn setter(skill: *mut Skill, k: String, v: mlua::Value) -> mlua::Result<()> {
-        println!("setter: {} {:?}", k, v);
-        fn iv(t: &mut i64, v: mlua::Value) {
-            match v {
-                mlua::Value::Integer(v) => *t = v,
-                mlua::Value::Number(v) => *t = v as i64,
-                _ => (),
-            }
-        }
-        fn bv(t: &mut bool, v: mlua::Value) {
-            match v {
-                mlua::Value::Boolean(v) => *t = v,
-                _ => (),
-            }
-        }
-        let s = &mut *skill;
-        match k.as_str() {
-            "dwLevel" => iv(&mut s.level, v),
-            "dwLevelUpExp" => iv(&mut s.dw_level_up_exp, v),
-            "nExpAddOdds" => iv(&mut s.n_exp_add_odds, v),
-            "nPlayerLevelLimit" => iv(&mut s.n_player_level_limit, v),
-            "nBaseThreat" => iv(&mut s.n_base_threat, v),
-            "nCostLife" => iv(&mut s.n_cost_life, v),
-            "nCostMana" => iv(&mut s.n_cost_mana, v),
-            "nCostStamina" => iv(&mut s.n_cost_stamina, v),
-            "nCostItemType" => iv(&mut s.n_cost_item_type, v),
-            "nCostItemIndex" => iv(&mut s.n_cost_item_index, v),
-            "nCostManaBasePercent" => iv(&mut s.n_cost_mana_base_percent, v),
-            "nCostSprintPower" => iv(&mut s.n_cost_sprint_power, v),
-            "bIsAccumulate" => bv(&mut s.b_is_accumulate, v),
-            "nChainBranch" => iv(&mut s.n_chain_branch, v),
-            "nChainDepth" => iv(&mut s.n_chain_depth, v),
-            "nMinRadius" => iv(&mut s.n_min_radius, v),
-            "nMaxRadius" => iv(&mut s.n_max_radius, v),
-            "nProtectRadius" => iv(&mut s.n_protect_radius, v),
-            "nHeight" => iv(&mut s.n_height, v),
-            "nRectWidth" => iv(&mut s.n_rect_width, v),
-            "nAngleRange" => iv(&mut s.n_angle_range, v),
-            "bFullAngleInAir" => bv(&mut s.b_full_angle_in_air, v),
-            "nAreaRadius" => iv(&mut s.n_area_radius, v),
-            "nTargetCountLimit" => iv(&mut s.n_target_count_limit, v),
-            "bIgnorePrepareState" => bv(&mut s.b_ignore_prepare_state, v),
-            "nPrepareFrames" => iv(&mut s.n_prepare_frames, v),
-            "nChannelInterval" => iv(&mut s.n_channel_interval, v),
-            "nChannelFrame" => iv(&mut s.n_channel_frame, v),
-            "nBulletVelocity" => iv(&mut s.n_bullet_velocity, v),
-            "bIsSunMoonPower" => bv(&mut s.b_is_sun_moon_power, v),
-            "bIsFormationSkill" => bv(&mut s.b_is_formation_skill, v),
-            "nFormationRange" => iv(&mut s.n_formation_range, v),
-            "nLeastFormationPopulation" => iv(&mut s.n_least_formation_population, v),
-            "nTargetLifePercentMin" => iv(&mut s.n_target_life_percent_min, v),
-            "nTargetLifePercentMax" => iv(&mut s.n_target_life_percent_max, v),
-            "nSelfLifePercentMin" => iv(&mut s.n_self_life_percent_min, v),
-            "nSelfLifePercentMax" => iv(&mut s.n_self_life_percent_max, v),
-            "nBeatBackRate" => iv(&mut s.n_beat_back_rate, v),
-            "nBrokenRate" => iv(&mut s.n_broken_rate, v),
-            "nBreakRate" => iv(&mut s.n_break_rate, v),
-            "nDismountingRate" => iv(&mut s.n_dismounting_rate, v),
-            "nWeaponDamagePercent" => iv(&mut s.n_weapon_damage_percent, v),
-            _ => (),
-        };
         Ok(())
     }
 }
@@ -585,7 +483,7 @@ mod tests {
             .init();
         let value = get(1, 1).unwrap();
         assert_eq!(value.id, 1);
-        assert_eq!(value.level, 1);
+        assert_eq!(value.dwLevel, 1);
         assert_eq!(value.name.as_ref().unwrap(), "测试技能");
         assert_eq!(value.max_level, 2);
         assert_eq!(value.kind_type, KindType::None);
@@ -604,16 +502,16 @@ mod tests {
         assert_eq!(value.target_relation_enemy, true);
         assert_eq!(value.recipe_type, 0);
         assert_eq!(value.is_frost, false);
-        assert_eq!(value.dw_level_up_exp, 110);
-        assert_eq!(value.n_cost_mana, 3);
-        assert_eq!(value.n_min_radius, 0);
-        assert_eq!(value.n_max_radius, 2048);
-        assert_eq!(value.n_area_radius, 3200);
-        assert_eq!(value.n_angle_range, 256);
-        assert_eq!(value.n_prepare_frames, 0);
-        assert_eq!(value.n_bullet_velocity, 0);
-        assert_eq!(value.n_break_rate, 307);
-        assert_eq!(value.n_channel_frame, 960);
-        assert_eq!(value.n_channel_interval, 32);
+        assert_eq!(value.dwLevelUpExp, 110);
+        assert_eq!(value.nCostMana, 3);
+        assert_eq!(value.nMinRadius, 0);
+        assert_eq!(value.nMaxRadius, 2048);
+        assert_eq!(value.nAreaRadius, 3200);
+        assert_eq!(value.nAngleRange, 256);
+        assert_eq!(value.nPrepareFrames, 0);
+        assert_eq!(value.nBulletVelocity, 0);
+        assert_eq!(value.nBreakRate, 307);
+        assert_eq!(value.nChannelFrame, 960);
+        assert_eq!(value.nChannelInterval, 32);
     }
 }
