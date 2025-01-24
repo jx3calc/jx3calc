@@ -12,7 +12,7 @@ static SKILL_RECIPE: Lazy<super::Manager<(i32, i32), SkillRecipe>> = Lazy::new(s
 /* struct */
 
 /// SkillRecipe
-pub struct SkillRecipe {
+pub(super) struct SkillRecipe {
     recipe_id: i32,
     recipe_level: i32,
     skill_recipe_type: i32,
@@ -26,7 +26,7 @@ pub struct SkillRecipe {
 
 /* impls */
 
-pub fn get(id: i32, level: i32) -> Option<&'static SkillRecipe> {
+pub(super) fn get(id: i32, level: i32) -> Option<&'static SkillRecipe> {
     SKILL_RECIPE.get(&(id, level))
 }
 

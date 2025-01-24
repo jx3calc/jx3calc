@@ -24,7 +24,7 @@ struct SkillData(Vec<String>);
 /// Skill
 #[allow(non_snake_case)]
 #[derive(Default)]
-pub struct Skill {
+pub(super) struct Skill {
     id: i32,
     dwLevel: i32,
     name: Option<String>,
@@ -196,7 +196,7 @@ struct DelaySubSkill {
 
 /* impls */
 
-pub fn get(id: i32, level: i32) -> Option<&'static Skill> {
+pub(super) fn get(id: i32, level: i32) -> Option<&'static Skill> {
     SKILL.get(&(id, level))
 }
 

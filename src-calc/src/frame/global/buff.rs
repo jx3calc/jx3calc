@@ -11,7 +11,7 @@ static BUFF: Lazy<super::Manager<(i32, i32), Buff>> = Lazy::new(super::Manager::
 /* struct */
 
 /// Buff
-pub struct Buff {
+pub(super) struct Buff {
     id: i32,
     level: i32,
     is_stackable: bool,
@@ -49,7 +49,7 @@ struct Attrib {
 
 /* impls */
 
-pub fn get(id: i32, level: i32) -> Option<&'static Buff> {
+pub(super) fn get(id: i32, level: i32) -> Option<&'static Buff> {
     BUFF.get(&(id, level))
 }
 

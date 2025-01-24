@@ -10,7 +10,7 @@ static COOLDOWN: Lazy<super::Manager<i32, Cooldown>> = Lazy::new(super::Manager:
 /* struct */
 
 /// Cooldown
-pub struct Cooldown {
+pub(super) struct Cooldown {
     id: i32,
     duration_frame: i32,
     min_duration_frame: i32,
@@ -20,7 +20,7 @@ pub struct Cooldown {
 
 /* impls */
 
-pub fn get(id: i32) -> Option<&'static Cooldown> {
+pub(super) fn get(id: i32) -> Option<&'static Cooldown> {
     COOLDOWN.get(&id)
 }
 

@@ -12,7 +12,7 @@ static TRINKET: Lazy<super::Manager<i32, Equipment>> = Lazy::new(super::Manager:
 /* struct */
 
 /// Equipment
-pub struct Equipment {
+pub(super) struct Equipment {
     id: i32,
     skill_id: i32,
     skill_level: i32,
@@ -21,7 +21,7 @@ pub struct Equipment {
 
 /* impls */
 
-pub fn get(id: i32) -> Option<&'static Equipment> {
+pub(super) fn get(id: i32) -> Option<&'static Equipment> {
     TRINKET.get(&id)
 }
 

@@ -3,7 +3,7 @@ use strum_macros::{Display, EnumIter};
 
 #[allow(non_camel_case_types)]
 #[derive(Display, EnumIter)]
-pub enum Buff {
+pub(crate) enum Buff {
     ID,
     Level,
     IsStackable,
@@ -19,10 +19,10 @@ pub enum Buff {
 }
 
 impl Buff {
-    pub const BEGIN: usize = 15;
-    pub const ACTIVE: usize = 2;
-    pub const END_TIME: usize = 2;
-    pub fn to_fields() -> Vec<String> {
+    pub(crate) const BEGIN: usize = 15;
+    pub(crate) const ACTIVE: usize = 2;
+    pub(crate) const END_TIME: usize = 2;
+    pub(crate) fn to_fields() -> Vec<String> {
         let mut res: Vec<String> = Buff::iter().map(|x| x.to_string()).collect();
         for i in 0..Buff::BEGIN {
             res.push(format!("BeginAttrib{}", i + 1));
@@ -47,12 +47,12 @@ macro_rules! enumtostr {
     ($name:ident { $($variant:ident),* $(,)? }) => {
         #[allow(non_camel_case_types)]
         #[derive(Display, EnumIter)]
-        pub enum $name {
+        pub(crate) enum $name {
             $($variant),*
         }
 
         impl $name {
-            pub fn to_fields() -> Vec<String> {
+            pub(crate) fn to_fields() -> Vec<String> {
                 $name::iter().map(|x| x.to_string()).collect()
             }
         }

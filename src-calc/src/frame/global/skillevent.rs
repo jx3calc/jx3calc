@@ -13,7 +13,7 @@ static SKILL_EVENT: Lazy<super::Manager<i32, SkillEvent>> = Lazy::new(super::Man
 /* struct */
 
 /// SkillEvent
-pub struct SkillEvent {
+pub(super) struct SkillEvent {
     id: i32,
     r#type: Type,
     odds: i32,
@@ -29,7 +29,7 @@ pub struct SkillEvent {
 
 /* impls */
 
-pub fn get(id: i32) -> Option<&'static SkillEvent> {
+pub(super) fn get(id: i32) -> Option<&'static SkillEvent> {
     SKILL_EVENT.get(&id)
 }
 
