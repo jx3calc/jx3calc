@@ -411,6 +411,15 @@ impl mlua::UserData for SkillUserdata {
 }
 
 impl SkillUserdata {
+    // See: https://stackoverflow.com/questions/72516441/pin-vs-box-why-is-box-not-enough
+    fn new(skill: Skill) -> std::pin::Pin<Box<Self>> {
+        Box::pin(SkillUserdata {
+            skill,
+            AddAttribute: mlua::Value::Nil,
+            _marker: std::marker::PhantomPinned,
+        })
+    }
+
     fn get_skill_level_data(skill: Skill, scriptfile: &str) -> Result<Skill, mlua::Error> {
         let lua_func = lua::get_func(scriptfile, FuncName::GetSkillLevelData)?.ok_or(
             mlua::Error::external(format!(
@@ -419,25 +428,23 @@ impl SkillUserdata {
             )),
         )?;
 
-        let mut ud = SkillUserdata {
-            skill,
-            AddAttribute: mlua::Value::Nil,
-            _marker: std::marker::PhantomPinned,
-        };
-        let ptr = &mut ud.skill as *mut Skill;
+        let mut pinned_instance = SkillUserdata::new(skill);
+        let r#ref = unsafe { pinned_instance.as_mut().get_unchecked_mut() }; // safe: necessary duplicate mut borrow
+        let ptr = &mut r#ref.skill as *mut Skill;
         lua::scope(|scope| {
             let add_attribute = scope.create_function(|_, (a, b, c, d)| -> mlua::Result<()> {
-                let this = unsafe { &mut *ptr };
+                let this = unsafe { &mut *ptr }; // safe: ptr is pinned
                 this.add_attribute(a, b, c, d)
             })?;
-            ud.AddAttribute = mlua::Value::Function(add_attribute);
+            r#ref.AddAttribute = mlua::Value::Function(add_attribute);
 
-            let udr = scope.create_userdata_ref_mut(&mut ud)?;
+            let udr = scope.create_userdata_ref_mut(r#ref)?;
             lua_func.call::<mlua::Value>(udr)?;
             Ok(())
         })?;
 
-        Ok(ud.skill)
+        let skill = std::mem::replace(&mut r#ref.skill, Skill::default());
+        Ok(skill)
     }
 }
 
