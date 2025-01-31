@@ -67,13 +67,18 @@ impl super::SubTrait<(i32, i32)> for Buff {
     }
     fn construct_from_tab(key: &(i32, i32)) -> Option<Vec<String>> {
         match tab_get("buff.tab", &[&key.0.to_string(), &key.1.to_string()]) {
-            Ok(mut res) => match UI::construct_from_tab(key) {
-                Some(mut ui) => {
+            Ok(mut res) => {
+                // 处理 UI
+                if let Some(mut ui) = UI::construct_from_tab(key) {
                     res.append(&mut ui);
-                    Some(res)
+                } else {
+                    let key = (key.0, 0);
+                    if let Some(mut ui) = UI::construct_from_tab(&key) {
+                        res.append(&mut ui);
+                    }
                 }
-                None => Some(res),
-            },
+                Some(res)
+            }
             Err(e) => {
                 error!("{:?} not found:\n{}", key, e);
                 None

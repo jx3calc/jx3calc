@@ -8,7 +8,7 @@ use crate::frame::{
 };
 use pak::{tab_get, tab_init};
 
-use log::error;
+use log::{error, warn};
 use mlua;
 use once_cell::sync::Lazy;
 use strum::IntoEnumIterator;
@@ -16,6 +16,9 @@ use strum::IntoEnumIterator;
 /* static manager variable */
 static SKILL: Lazy<super::Manager<(i32, i32), Skill>> = Lazy::new(super::Manager::new);
 static SKILL_DATA: Lazy<super::Manager<i32, SkillData>> = Lazy::new(super::Manager::new);
+static COUNT_BINDBUFF: usize = 4;
+static COUNT_COOLDOWN_NORMAL: usize = 3;
+static COUNT_COOLDOWN_CHECK: usize = 3;
 
 /* struct */
 
@@ -134,12 +137,25 @@ struct UI(String);
 #[allow(non_snake_case)]
 struct SkillUserdata {
     skill: Skill,
-    AddAttribute: mlua::Value,
     _marker: std::marker::PhantomPinned,
+    AddAttribute: mlua::Value,
+    AddSlowCheckSelfBuff: mlua::Value,
+    AddSlowCheckDestBuff: mlua::Value,
+    AddSlowCheckSelfOwnBuff: mlua::Value,
+    AddSlowCheckDestOwnBuff: mlua::Value,
+    AddCheckSelfLearntSkill: mlua::Value,
+    BindBuff: mlua::Value,
+    SetPublicCoolDown: mlua::Value,
+    SetNormalCoolDown: mlua::Value,
+    SetCheckCoolDown: mlua::Value,
+    SetDelaySubSkill: mlua::Value,
+    SetSubsectionSkill: mlua::Value,
+    SetSunSubsectionSkill: mlua::Value,
+    SetMoonSubsectionSkill: mlua::Value,
 }
 
 #[derive(Debug, PartialEq, Eq)]
-enum AttributeValue {
+enum TypeParam {
     Int(i32),
     Str(String),
 }
@@ -147,8 +163,8 @@ enum AttributeValue {
 struct Attribute {
     mode: i32,
     r#type: i32,
-    param1: AttributeValue,
-    param2: AttributeValue,
+    param1: TypeParam,
+    param2: i32,
 }
 
 enum CheckBuffType {
@@ -178,14 +194,14 @@ struct BindBuffItem {
     level: i32,
 }
 
-type BindBuff = [Option<BindBuffItem>; 4];
+type BindBuff = [Option<BindBuffItem>; COUNT_BINDBUFF];
 
 #[derive(Default)]
 struct Cooldown {
     public: Option<i32>,
-    normal: [Option<i32>; 3],
-    normal_add: [i32; 3],
-    check: [Option<i32>; 3],
+    normal: [Option<i32>; COUNT_COOLDOWN_NORMAL],
+    normal_add: [i32; COUNT_COOLDOWN_NORMAL],
+    check: [Option<i32>; COUNT_COOLDOWN_CHECK],
 }
 
 struct DelaySubSkill {
@@ -234,17 +250,22 @@ impl super::SubTrait<(i32, i32)> for Skill {
         UI::tab_init();
     }
     fn construct_from_tab(key: &(i32, i32)) -> Option<Vec<String>> {
+        // 特殊处理: 使用 SKILL_DATA 存储缓存, 因此此处不直接 tab_get, 而是通过缓存获取.
         match SKILL_DATA.get(&(key.0)) {
             Some(res) => {
                 let mut res = res.0.clone();
+                // 处理额外信息: level. 将其压至 res 中.
                 res.push(key.1.to_string());
-                match UI::construct_from_tab(key) {
-                    Some(mut ui) => {
+                // 处理 UI
+                if let Some(mut ui) = UI::construct_from_tab(key) {
+                    res.append(&mut ui);
+                } else {
+                    let key = (key.0, 0);
+                    if let Some(mut ui) = UI::construct_from_tab(&key) {
                         res.append(&mut ui);
-                        Some(res)
                     }
-                    None => Some(res),
                 }
+                Some(res)
             }
             None => {
                 error!("{:?} data get error.", key);
@@ -331,7 +352,7 @@ impl super::SubTrait<(i32, i32)> for UI {
         match tab_get("skill.txt", &[&key.0.to_string(), &key.1.to_string()]) {
             Ok(res) => Some(res),
             Err(e) => {
-                error!("{:?} not found:\n{}", key, e);
+                warn!("{:?} not found:\n{}", key, e);
                 None
             }
         }
@@ -407,6 +428,19 @@ impl mlua::UserData for SkillUserdata {
             };
         }
         add_functions!(fields, AddAttribute);
+        add_functions!(fields, AddSlowCheckSelfBuff);
+        add_functions!(fields, AddSlowCheckDestBuff);
+        add_functions!(fields, AddSlowCheckSelfOwnBuff);
+        add_functions!(fields, AddSlowCheckDestOwnBuff);
+        add_functions!(fields, AddCheckSelfLearntSkill);
+        add_functions!(fields, BindBuff);
+        add_functions!(fields, SetPublicCoolDown);
+        add_functions!(fields, SetNormalCoolDown);
+        add_functions!(fields, SetCheckCoolDown);
+        add_functions!(fields, SetDelaySubSkill);
+        add_functions!(fields, SetSubsectionSkill);
+        add_functions!(fields, SetSunSubsectionSkill);
+        add_functions!(fields, SetMoonSubsectionSkill);
     }
 }
 
@@ -415,8 +449,21 @@ impl SkillUserdata {
     fn new(skill: Skill) -> std::pin::Pin<Box<Self>> {
         Box::pin(SkillUserdata {
             skill,
-            AddAttribute: mlua::Value::Nil,
             _marker: std::marker::PhantomPinned,
+            AddAttribute: mlua::Value::Nil,
+            AddSlowCheckSelfBuff: mlua::Value::Nil,
+            AddSlowCheckDestBuff: mlua::Value::Nil,
+            AddSlowCheckSelfOwnBuff: mlua::Value::Nil,
+            AddSlowCheckDestOwnBuff: mlua::Value::Nil,
+            AddCheckSelfLearntSkill: mlua::Value::Nil,
+            BindBuff: mlua::Value::Nil,
+            SetPublicCoolDown: mlua::Value::Nil,
+            SetNormalCoolDown: mlua::Value::Nil,
+            SetCheckCoolDown: mlua::Value::Nil,
+            SetDelaySubSkill: mlua::Value::Nil,
+            SetSubsectionSkill: mlua::Value::Nil,
+            SetSunSubsectionSkill: mlua::Value::Nil,
+            SetMoonSubsectionSkill: mlua::Value::Nil,
         })
     }
 
@@ -432,11 +479,66 @@ impl SkillUserdata {
         let r#ref = unsafe { pinned_instance.as_mut().get_unchecked_mut() }; // safe: necessary duplicate mut borrow
         let ptr = &mut r#ref.skill as *mut Skill;
         lua::scope(|scope| {
-            let add_attribute = scope.create_function(|_, (a, b, c, d)| -> mlua::Result<()> {
+            let f = scope.create_function(|_, (a, b, c, d)| -> mlua::Result<()> {
                 let this = unsafe { &mut *ptr }; // safe: ptr is pinned
                 this.add_attribute(a, b, c, d)
             })?;
-            r#ref.AddAttribute = mlua::Value::Function(add_attribute);
+            r#ref.AddAttribute = mlua::Value::Function(f);
+            let f = scope.create_function(|_, (a, b, c, d, e)| -> mlua::Result<()> {
+                let this = unsafe { &mut *ptr }; // safe: ptr is pinned
+                this.add_check_buff(CheckBuffType::CheckSelf, a, b, c, d, e)
+            })?;
+            r#ref.AddSlowCheckSelfBuff = mlua::Value::Function(f);
+            let f = scope.create_function(|_, (a, b, c, d, e)| -> mlua::Result<()> {
+                let this = unsafe { &mut *ptr }; // safe: ptr is pinned
+                this.add_check_buff(CheckBuffType::CheckDest, a, b, c, d, e)
+            })?;
+            r#ref.AddSlowCheckDestBuff = mlua::Value::Function(f);
+            let f = scope.create_function(|_, (a, b, c, d, e)| -> mlua::Result<()> {
+                let this = unsafe { &mut *ptr }; // safe: ptr is pinned
+                this.add_check_buff(CheckBuffType::CheckSelfOwn, a, b, c, d, e)
+            })?;
+            r#ref.AddSlowCheckSelfOwnBuff = mlua::Value::Function(f);
+            let f = scope.create_function(|_, (a, b, c, d, e)| -> mlua::Result<()> {
+                let this = unsafe { &mut *ptr }; // safe: ptr is pinned
+                this.add_check_buff(CheckBuffType::ChekDestOwn, a, b, c, d, e)
+            })?;
+            r#ref.AddSlowCheckDestOwnBuff = mlua::Value::Function(f);
+            let f = scope.create_function(|_, (a, b, c)| -> mlua::Result<()> {
+                let this = unsafe { &mut *ptr }; // safe: ptr is pinned
+                this.check_self_learnt_skill(a, b, c)
+            })?;
+            r#ref.AddCheckSelfLearntSkill = mlua::Value::Function(f);
+            let f = scope.create_function(|_, (a, b, c)| -> mlua::Result<()> {
+                let this = unsafe { &mut *ptr }; // safe: ptr is pinned
+                this.bind_buff(a, b, c)
+            })?;
+            r#ref.BindBuff = mlua::Value::Function(f);
+            let f = scope.create_function(|_, a| -> mlua::Result<()> {
+                let this = unsafe { &mut *ptr }; // safe: ptr is pinned
+                this.set_public_cool_down(a)
+            })?;
+            r#ref.SetPublicCoolDown = mlua::Value::Function(f);
+            let f = scope.create_function(|_, (a, b)| -> mlua::Result<()> {
+                let this = unsafe { &mut *ptr }; // safe: ptr is pinned
+                this.set_normal_cool_down(a, b)
+            })?;
+            r#ref.SetNormalCoolDown = mlua::Value::Function(f);
+            let f = scope.create_function(|_, (a, b)| -> mlua::Result<()> {
+                let this = unsafe { &mut *ptr }; // safe: ptr is pinned
+                this.set_check_cool_down(a, b)
+            })?;
+            r#ref.SetCheckCoolDown = mlua::Value::Function(f);
+            let f = scope.create_function(|_, (a, b, c, d)| -> mlua::Result<()> {
+                let this = unsafe { &mut *ptr }; // safe: ptr is pinned
+                this.set_sun_subsection_skill(a, b, c, d)
+            })?;
+            r#ref.SetSunSubsectionSkill = mlua::Value::Function(f);
+            let f = scope.create_function(|_, (a, b, c, d)| -> mlua::Result<()> {
+                let this = unsafe { &mut *ptr }; // safe: ptr is pinned
+                this.set_moon_subsection_skill(a, b, c, d)
+            })?;
+            r#ref.SetMoonSubsectionSkill = mlua::Value::Function(f);
 
             let udr = scope.create_userdata_ref_mut(r#ref)?;
             lua_func.call::<mlua::Value>(udr)?;
@@ -451,22 +553,20 @@ impl SkillUserdata {
 impl Skill {
     fn add_attribute(
         &mut self,
-        a: mlua::Value,
-        b: mlua::Value,
-        c: mlua::Value,
-        d: mlua::Value,
+        mode: i32,
+        r#type: i32,
+        param1: mlua::Value,
+        param2: mlua::Value,
     ) -> mlua::Result<()> {
-        let mode = a.as_i32().ok_or(mlua::Error::runtime("mode is not i32"))?;
-        let r#type = b.as_i32().ok_or(mlua::Error::runtime("type is not i32"))?;
-        let param1 = match c {
-            mlua::Value::Integer(v) => AttributeValue::Int(v as i32),
-            mlua::Value::String(v) => AttributeValue::Str(v.clone().to_string_lossy()),
-            _ => return Err(mlua::Error::runtime("param1 is not integer or string")),
+        let param1 = match param1 {
+            mlua::Value::Integer(v) => TypeParam::Int(v as i32),
+            mlua::Value::String(v) => TypeParam::Str(v.clone().to_string_lossy()),
+            mlua::Value::Nil => return Ok(()),
+            _ => return Err(mlua::Error::runtime("unknown param1 type")),
         };
-        let param2 = match d {
-            mlua::Value::Integer(v) => AttributeValue::Int(v as i32),
-            mlua::Value::String(v) => AttributeValue::Str(v.clone().to_string_lossy()),
-            _ => return Err(mlua::Error::runtime("param2 is not integer or string")),
+        let param2 = match param2 {
+            mlua::Value::Integer(v) => v as i32,
+            _ => return Err(mlua::Error::runtime("unknown param2 type")),
         };
         self.attributes.push(Attribute {
             mode,
@@ -474,6 +574,93 @@ impl Skill {
             param1,
             param2,
         });
+        Ok(())
+    }
+
+    fn add_check_buff(
+        &mut self,
+        r#type: CheckBuffType,
+        buff_id: i32,
+        stacknum: i32,
+        stacknum_compare_flag: i32,
+        level: i32,
+        level_compare_flag: i32,
+    ) -> mlua::Result<()> {
+        self.check_buffs.push(CheckBuff {
+            r#type,
+            buff_id,
+            stacknum,
+            stacknum_compare_flag,
+            level,
+            level_compare_flag,
+        });
+        Ok(())
+    }
+
+    fn check_self_learnt_skill(
+        &mut self,
+        id: i32,
+        level: i32,
+        level_compare_flag: i32,
+    ) -> mlua::Result<()> {
+        self.check_self_learnt_skills.push(CheckSelfLearntSkill {
+            id,
+            level,
+            level_compare_flag,
+        });
+        Ok(())
+    }
+
+    fn bind_buff(&mut self, index: i32, buff_id: i32, level: i32) -> mlua::Result<()> {
+        if index < 1 || index > COUNT_BINDBUFF as i32 {
+            return Err(mlua::Error::runtime("index out of range"));
+        }
+        self.bind_buff[(index - 1) as usize] = Some(BindBuffItem { id: buff_id, level });
+        Ok(())
+    }
+
+    fn set_public_cool_down(&mut self, id: i32) -> mlua::Result<()> {
+        self.cooldown.public = Some(id);
+        Ok(())
+    }
+
+    fn set_normal_cool_down(&mut self, index: i32, id: i32) -> mlua::Result<()> {
+        if index < 1 || index > COUNT_COOLDOWN_NORMAL as i32 {
+            return Err(mlua::Error::runtime("index out of range"));
+        }
+        self.cooldown.normal[(index - 1) as usize] = Some(id);
+        Ok(())
+    }
+
+    fn set_check_cool_down(&mut self, index: i32, id: i32) -> mlua::Result<()> {
+        if index < 1 || index > COUNT_COOLDOWN_CHECK as i32 {
+            return Err(mlua::Error::runtime("index out of range"));
+        }
+        self.cooldown.check[(index - 1) as usize] = Some(id);
+        Ok(())
+    }
+
+    fn set_sun_subsection_skill(
+        &mut self,
+        _dummy_a: i32,
+        _dummy_b: i32,
+        id: i32,
+        level: i32,
+    ) -> mlua::Result<()> {
+        self.sun_subsection_skill_id = id;
+        self.sun_subsection_skill_level = level;
+        Ok(())
+    }
+
+    fn set_moon_subsection_skill(
+        &mut self,
+        _dummy_a: i32,
+        _dummy_b: i32,
+        id: i32,
+        level: i32,
+    ) -> mlua::Result<()> {
+        self.moon_subsection_skill_id = id;
+        self.moon_subsection_skill_level = level;
         Ok(())
     }
 }
@@ -520,5 +707,23 @@ mod tests {
         assert_eq!(value.nBreakRate, 307);
         assert_eq!(value.nChannelFrame, 960);
         assert_eq!(value.nChannelInterval, 32);
+        let value = get(3967, 32).unwrap(); // 净世破魔击
+        assert_eq!(value.id, 3967);
+        assert_eq!(value.dwLevel, 32);
+        assert_eq!(value.name.as_ref().unwrap(), "净世破魔击");
+        assert_eq!(value.max_level, 32);
+        assert_eq!(value.kind_type, KindType::SolarMagic);
+        assert_eq!(value.recipe_type, 3967);
+        assert_eq!(value.cooldown.public, Some(503));
+        assert_eq!(value.cooldown.normal[0], None);
+        assert_eq!(value.cooldown.check[0], Some(444));
+        assert_eq!(value.nMinRadius, 0);
+        assert_eq!(value.nMaxRadius, 15 * 64);
+        assert_eq!(value.nAngleRange, 128);
+        assert_eq!(value.bIsSunMoonPower, true);
+        assert_eq!(value.sun_subsection_skill_id, 4037);
+        assert_eq!(value.sun_subsection_skill_level, 32);
+        assert_eq!(value.moon_subsection_skill_id, 4038);
+        assert_eq!(value.moon_subsection_skill_level, 32);
     }
 }

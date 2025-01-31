@@ -97,6 +97,8 @@ impl LuaManager {
         set_func!(IsClient);
         set_table!(ABSORB_ATTRIBUTE_SHIELD_TYPE);
         set_table!(ATTRIBUTE_EFFECT_MODE);
+        set_table!(BUFF_COMPARE_FLAG);
+        set_table!(SKILL_COMPARE_FLAG);
         set_table!(ATTRIBUTE_TYPE);
         set_table!(GLOBAL);
     }

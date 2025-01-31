@@ -16,6 +16,18 @@ enumxlua! { ATTRIBUTE_EFFECT_MODE {
     EFFECT_TO_DEST_AND_ROLLBACK,
 }}
 
+enumxlua! { BUFF_COMPARE_FLAG {
+    EQUAL,
+    GREATER,
+    GREATER_EQUAL,
+}}
+
+enumxlua! { SKILL_COMPARE_FLAG {
+    EQUAL,
+    GREATER,
+    GREATER_EQUAL,
+}}
+
 enumxlua! { GLOBAL {
     GAME_FPS = 16,
 }}
