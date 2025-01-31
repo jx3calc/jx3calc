@@ -415,6 +415,16 @@ dependencies = [
 [[package]]
 name = "calc"
 version = "0.1.0"
+dependencies = [
+ "env_logger",
+ "log",
+ "mlua",
+ "num_enum",
+ "once_cell",
+ "pak",
+ "strum",
+ "strum_macros",
+]
 
 [[package]]
 name = "camino"
@@ -2096,8 +2106,7 @@ dependencies = [
 [[package]]
 name = "lua-src"
 version = "547.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1edaf29e3517b49b8b746701e5648ccb5785cde1c119062cbabbc5d5cd115e42"
+source = "git+https://github.com/jx3calc/lua-src-rs.git#21e11305bcd7bc9c821261a2d655016e512f6113"
 dependencies = [
  "cc",
 ]
@@ -2111,12 +2120,6 @@ dependencies = [
  "cc",
  "which",
 ]
-
-[[package]]
-name = "lunify"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af319e973195cc1edc87c21c8c206af77611176b0c62e94add116d40a765aaed"
 
 [[package]]
 name = "lzham-sys"
@@ -2662,7 +2665,6 @@ dependencies = [
  "encoding_rs",
  "env_logger",
  "log",
- "lunify",
  "lzham-sys",
  "memmap2",
  "mlua",
@@ -3354,6 +3356,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "rustversion"
+version = "1.0.19"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f7c45b9784283f1b2e7fb61b42047c2fd678ef0960d4f6f1eba131594cc369d4"
+
+[[package]]
 name = "ryu"
 version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3767,6 +3775,25 @@ name = "strsim"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f"
+
+[[package]]
+name = "strum"
+version = "0.26.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8fec0f0aef304996cf250b31b5a10dee7980c85da9d759361292b8bca5a18f06"
+
+[[package]]
+name = "strum_macros"
+version = "0.26.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4c6bee85a5a24955dc440386795aa378cd9cf82acd5f764469152d2270e581be"
+dependencies = [
+ "heck 0.5.0",
+ "proc-macro2",
+ "quote",
+ "rustversion",
+ "syn 2.0.90",
+]
 
 [[package]]
 name = "subtle"

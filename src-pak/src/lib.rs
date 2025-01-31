@@ -43,7 +43,7 @@ pub fn tab_init(path: &str, indexs: &[&str], fields: &[&str]) -> bool {
     jx3pak::tab_init(ptr_path, ptr_indexs, ptr_fields) == (0 as c_int)
 }
 
-static RESULT_MAXLEN: usize = 1024 * 1024; // 1MB
+static RESULT_MAXLEN: usize = 16 * 1024 * 1024; // 16MB
 
 pub fn tab_get(tabname: &str, key: &[&str]) -> std::io::Result<Vec<String>> {
     let tabname = ensure_0!(tabname);
@@ -99,6 +99,9 @@ mod tests {
 
     #[test]
     fn test() {
+        // env_logger::builder()
+        //     .filter_level(log::LevelFilter::Trace)
+        //     .init();
         match std::env::var("v4_path") {
             Ok(v4_path) => assert!(init(&v4_path)), // v4
             Err(_) => assert!(init("./cache")),     // v5
